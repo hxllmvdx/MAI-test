@@ -1,4 +1,4 @@
-// src/types/olympiad.ts
+
 export interface OlympiadResponse {
   id: number;
   title: string;

@@ -48,3 +48,34 @@
     margin: 20px;
 }
 
+.dashboard-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.guest-banner {
+  padding: 15px;
+  background: #fff8e1;
+  border-left: 4px solid #ffc107;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.dashboard-button {
+  padding: 10px 15px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dashboard-button:hover {
+  background: #1565c0;
+}

@@ -97,3 +97,17 @@ h1{
     transform: translateY(0);
   }
 }
+
+.guest-button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.guest-button:hover {
+  background: #e0e0e0;
+}
+

@@ -4,11 +4,14 @@ import { useNavigate } from "react-router-dom";
 import './dashboard.css';
 
 export const Dashboard = () => {
+  const isGuest = localStorage.getItem('guest_mode') === 'true';
   const [userData, setUserData] = useState<{ username: string } | null>(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isGuest) return;
+
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -31,10 +34,11 @@ export const Dashboard = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, isGuest]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("guest_mode");
     navigate("/login");
   };
 
@@ -43,21 +47,32 @@ export const Dashboard = () => {
   };
 
   const handleProfileClick = () => {
+    if (isGuest) {
+      alert("Please register or login to access profile");
+      return;
+    }
     navigate("/profile");
   };
-
-  if (error) {
-    return <div className="error-message">{error}</div>;
-  }
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Dashboard</h1>
+      {isGuest && (
+        <div className="guest-banner">
+          You're browsing in guest mode. <a href="/register">Register</a> for full access.
+        </div>
+      )}
       {userData && <p className="welcome-message">Welcome, {userData.username}!</p>}
       <div className="button-group">
-        <button className="dashboard-button" onClick={handleOlympiadsClick}>Все олимпиады</button>
-        <button className="dashboard-button" onClick={handleProfileClick}>Профиль</button>
-        <button className="dashboard-button" onClick={handleLogout}>Logout</button>
+        <button className="dashboard-button" onClick={handleOlympiadsClick}>
+          Все олимпиады
+        </button>
+        <button className="dashboard-button" onClick={handleProfileClick}>
+          Профиль
+        </button>
+        <button className="dashboard-button" onClick={handleLogout}>
+          {isGuest ? "Exit Guest Mode" : "Logout"}
+        </button>
       </div>
     </div>
   );
