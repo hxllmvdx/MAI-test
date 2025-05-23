@@ -1,0 +1,120 @@
+body{
+    background-color: #a171cb;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.register-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.register-form .form-label {
+  font-size: 0.95rem;
+  color: rgb(204, 27, 253);
+  font-weight: 500;
+}
+
+.register-form .form-input {
+  padding: 0.9rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.register-form .form-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.3);
+}
+
+.register-form .form-button {
+  padding: 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #1b0089 0%, #a171cb 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.register-form .form-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(118, 75, 162, 0.4);
+}
+
+.register-form .form-button:active {
+  transform: translateY(0);
+}
+
+.register-form .error-message {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: rgba(241, 56, 24, 0.696);
+  color: #ffcccb;
+  border: 1px solid rgba(255, 99, 71, 0.3);
+  font-size: 0.9rem;
+  text-align: center;
+  animation: slideDown 0.4s ease-out forwards;
+  margin-left: 469px;
+  
+}
+
+.register-form .success-message {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: rgba(46, 213, 115, 0.2);
+  color: #96f7d2;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+  font-size: 0.9rem;
+  text-align: center;
+  animation: slideDown 0.4s ease-out forwards;
+}
+
+.register-form .form-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+h1{
+    margin-left: 470px;
+    color: #a171cb;
+}
+.form-group{
+    margin-left: 450px;
+}
+
+.form-label{
+    text-align: center;
+}
+
+.form-button{
+    margin-left: 450px;
+}
+p{
+    margin-left: 450px;
+    color: #a171cb;
+}
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
