@@ -57,6 +57,7 @@ export const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Dashboard</h1>
+        {error && <div className="error-message">{error}</div>} {/* Добавлено */}
       {isGuest && (
         <div className="guest-banner">
           You're browsing in guest mode. <a href="/register">Register</a> for full access.
