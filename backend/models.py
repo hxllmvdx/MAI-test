@@ -1,0 +1,116 @@
+from datetime import datetime
+from sqlalchemy import ForeignKey, String, DateTime, Boolean, Integer, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
+from .database import Base
+
+user_selected_olympiad = Table(
+    'user_selected_olympiad', Base.metadata,
+    mapped_column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    mapped_column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True)
+)
+
+user_selected_subject = Table(
+    'user_selected_subject', Base.metadata,
+    mapped_column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    mapped_column('subject', String, primary_key=True)
+)
+
+user_selected_level = Table(
+    'user_selected_level', Base.metadata,
+    mapped_column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    mapped_column('level', String, primary_key=True)
+)
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String(1024))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    n_days_notice: Mapped[int] = mapped_column(Integer, default=7)
+    
+
+    participations: Mapped[list["Participation"]] = relationship(back_populates="user")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="author")
+    notifications: Mapped[list["Notification"]] = relationship(back_populates="user")
+    
+    selected_olympiads: Mapped[list["Olympiad"]] = relationship(
+        secondary=user_selected_olympiad,
+        back_populates="subscribed_users"
+    )
+    
+    selected_subjects: Mapped[list["Olympiad"]] = relationship(
+        secondary=user_selected_subject,
+        back_populates="subscribed_by_subject",
+        viewonly=True
+    )
+    
+    selected_levels: Mapped[list["Olympiad"]] = relationship(
+        secondary=user_selected_level,
+        back_populates="subscribed_by_level",
+        viewonly=True
+    )
+
+class Olympiad(Base):
+    __tablename__ = "olympiads"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), index=True)
+    description: Mapped[str | None] = mapped_column(String(1024))
+    start_date: Mapped[datetime] = mapped_column(DateTime)
+    end_date: Mapped[datetime] = mapped_column(DateTime)
+    registration_deadline: Mapped[datetime] = mapped_column(DateTime)
+    level: Mapped[str] = mapped_column(String(50))
+    subject: Mapped[str] = mapped_column(String(100))
+    university: Mapped[str] = mapped_column(String(150))
+    registration_link: Mapped[str] = mapped_column(String(2048))
+    
+    comments: Mapped[list["Comment"]] = relationship(back_populates="olympiad")
+    participations: Mapped[list["Participation"]] = relationship(back_populates="olympiad")
+    subscribed_users: Mapped[list["User"]] = relationship(
+        secondary=user_selected_olympiad,
+        back_populates="selected_olympiads"
+    )
+    
+    @hybrid_property
+    def status(self) -> str:
+        return "completed" if datetime.now() > self.end_date else "upcoming"
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    text: Mapped[str] = mapped_column(String(2048))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"))
+    
+    author: Mapped["User"] = relationship(back_populates="comments")
+    olympiad: Mapped["Olympiad"] = relationship(back_populates="comments")
+
+class Participation(Base):
+    __tablename__ = "participations"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"), primary_key=True)
+    participation_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    user: Mapped["User"] = relationship(back_populates="participations")
+    olympiad: Mapped["Olympiad"] = relationship(back_populates="participations")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    message: Mapped[str] = mapped_column(String(1024))
+    sent_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"))
+    
+    user: Mapped["User"] = relationship(back_populates="notifications")
+    olympiad: Mapped["Olympiad"] = relationship()
