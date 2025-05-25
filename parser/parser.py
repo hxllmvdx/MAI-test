@@ -2,18 +2,12 @@ from bs4 import BeautifulSoup
 import requests as req
 from config import Config
 
-config = Config(_env_file='./.env')
+config = Config(_env_file='../.env')
 first_lvl = config.first_lvl
 second_lvl = config.second_lvl
 third_lvl = config.third_lvl
 months_urls = config.months_urls
-
-
-    #разбор по /календарь/
-    #надо искать по find_all
-import requests
-from bs4 import BeautifulSoup
-
+subjects_urls = config.subjects_urls
 
 
 def get_subjects(url: str):
@@ -27,31 +21,20 @@ def get_subjects(url: str):
     all_links = university.find_all('a')
     for link in all_links:
         if link.text in all_name_university:
-            #print(f"Название: {link.text}, Ссылка: {link['href']}")
-            nt1 = req.get(str(link['href']))
+            nt1 = req.get(link['href'])
             university_site = BeautifulSoup(nt1.text, 'html.parser')
-            subjects_list_dirty = university_site.find_all("div", class_="su-spoiler-title")
+            subjects_list_dirty = university_site.find_all("div", class_="su-spoiler-title")[:-3]
             subjects_list_clear = []
 
             for subjects in subjects_list_dirty:
                 subjects_list_clear.append(subjects.text)
 
-
-
-
             if 'Подготовка' in university_site.find("div", class_="su-tabs-nav").text:
                 result[link.text] = subjects_list_clear
-                print(f"Название: {link.text}, предметы : {subjects_list_clear}")
-
             else:
                 result[link.text] = None
-                print(f'"Название: {link.text}, Ссылка: отсутствует')
-            
-        print(get_subjects('https://postypashki.ru/олимпиады/'))
 
-    
- 
-
+    return result
 
 
 def get_months_olimp(url: str):
@@ -83,14 +66,10 @@ def get_months_olimp(url: str):
                 # Ищем нужную информацию на второстепенном сайте
                 url = site_soup.find("div", class_="ecwd-url")
                 url_text = url.text.replace('\n', '').replace('\t', '') if url else "URL не найден"
-                
 
-                
                 university_name = full_name[p].text.split('–')[0].strip() if p < len(full_name) else "Название не найдено"
                 #real_name = full_name[p].text.split('–')[0] может потом понадобится
                 key = f'{day}_{p+1}'
-
-
 
                 #распределение по уровням
                 for i in university_name.split(' '):
@@ -103,10 +82,6 @@ def get_months_olimp(url: str):
                     else:
                         level = '-'
 
-                
-                    
-                    
-
                 #закносим каждую олимпиаду в месяц
                 months[key] = {
                     'name': full_name[p].text if p < len(full_name) else "Нет данных",
@@ -115,8 +90,6 @@ def get_months_olimp(url: str):
                     'url': url_text,
                     'university': university_name,
                     'level' : level,
-                    'subjects' : get_subjects()
-                    
                 }
                 
             except Exception as e:
@@ -124,5 +97,3 @@ def get_months_olimp(url: str):
                 continue
 
     return months
- 
-#print(get_months_olimp(months_urls['march']))
