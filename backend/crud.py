@@ -8,6 +8,7 @@ from auth import get_password_hash
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ModelType = TypeVar("ModelType", bound=Base)
 
+
 class BaseCRUD:
     """Базовый класс для CRUD-операций с моделями SQLAlchemy."""
     
@@ -80,6 +81,7 @@ class BaseCRUD:
             db.rollback()
             raise e
 
+
 class SubscriptionService:
     """Сервис управления подписками пользователей на олимпиады."""
     
@@ -126,6 +128,7 @@ class SubscriptionService:
         except ValueError:
             return False
 
+
 class ParticipationService:
     """Сервис управления участием в олимпиадах."""
     
@@ -161,6 +164,7 @@ class ParticipationService:
         db.commit()
         return result > 0
 
+
 class NotificationService:
     """Сервис работы с уведомлениями пользователей."""
     
@@ -174,6 +178,7 @@ class NotificationService:
             Notification.user_id == user_id,
             Notification.is_read == False
         ).options(joinedload(Notification.olympiad)).all()
+
 
 class OlympiadFilterService:
     """Сервис фильтрации олимпиад по различным критериям."""
@@ -196,6 +201,7 @@ class OlympiadFilterService:
             query = query.filter(Olympiad.university.in_(universities))
         
         return query.all()
+
 
 class CommentService:
     """Сервис работы с комментариями к олимпиадам."""
@@ -227,6 +233,7 @@ class CommentService:
         return db.query(Comment).filter(
             Comment.olympiad_id == olympiad_id
         ).options(joinedload(Comment.author)).all()
+
 
 # Инициализация зависимостей
 user_crud = BaseCRUD(User)

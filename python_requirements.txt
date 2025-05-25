@@ -5,3 +5,4 @@ fastapi==0.115.12
 jose==1.0.0
 passlib==1.7.4
 sqlalchemy==2.0.41
+pandas==2.2.3
