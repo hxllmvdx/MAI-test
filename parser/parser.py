@@ -148,6 +148,3 @@ def upload_to_db():
         if_exists='replace',
         index=False
     )
-
-
-upload_to_db()
