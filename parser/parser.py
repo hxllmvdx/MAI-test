@@ -59,14 +59,15 @@ def get_subjects(url: str, all_name_university: list):
             temp[name] = '-'
 
     for k, v in temp.items():
-        result['name'] = result.get('name', []) + [k]
+        result['title'] = result.get('title', []) + [k]
         result['subjects'] = result.get('subjects', []) + [v]
 
     return result
 
 
 def get_months_olimp():
-    months = {'name': []}
+    months = {'title': []}
+
     for url in months_urls.values():
         resp = req.get(url)
         soup = BeautifulSoup(resp.text, 'html.parser')
@@ -112,35 +113,41 @@ def get_months_olimp():
 
                     name = full_name[p].text if p < len(full_name) else "Нет данных"
 
-                    if name not in months['name']:
-                        months['name'] = months.get('name', []) + [name]
-                        months['time'] = months.get('time', []) + [time[p].text if p < len(time) else "Нет данных"]
-                        months['date'] = months.get('date', []) + [date[p].text if p < len(date) else "Нет данных"]
-                        months['url'] = months.get('url', []) + [url_text]
-                        months['university'] = months.get('university', []) + [university_name]
+                    dates = (date[p].text if p < len(date) else "Нет данных").split('-')
+                    start_date = dates[0].strip()
+                    end_date = dates[0].strip() if len(dates) == 1 else dates[1].strip()
+
+                    if name not in months['title']:
+                        months['title'] = months.get('title', []) + [name.strip()]
+                        months['duration'] = months.get('duration', []) + [time[p].text.strip() if p < len(time) else "Нет данных"]
+                        months['start_date'] = months.get('start_date', []) + [start_date]
+                        months['end_date'] = months.get('end_date', []) + [end_date]
+                        months['registration_link'] = months.get('registration_link', []) + [url_text.strip()]
+                        months['university'] = months.get('university', []) + [university_name.strip()]
                         months['level'] = months.get('level', []) + [level]
 
                 except Exception as e:
                     print(f"Ошибка при обработке ссылки {link}: {str(e)}")
                     continue
 
-    return months, months['name']
+    return months, months['title']
 
 
 def upload_to_db():
     months = get_months_olimp()
     months_df = pd.DataFrame(months[0])
-    months_df = months_df.sort_values(by='name', ascending=False)
+    months_df = months_df.sort_values(by='title', ascending=False)
     months_df = months_df.reset_index(drop=True)
 
     subjects = get_subjects(subjects_urls, months[1])
     subjects_df = pd.DataFrame(subjects)
-    subjects_df = subjects_df.sort_values(by='name', ascending=False)
-    subjects_df = subjects_df.drop(columns='name')
+    subjects_df = subjects_df.sort_values(by='title', ascending=False)
+    subjects_df = subjects_df.drop(columns='title')
     subjects_df = subjects_df.reset_index(drop=True)
 
     df = pd.concat([months_df, subjects_df], axis=1)
     df = df.dropna()
+    df['id'] = list(range(len(df)))
 
     df.to_sql(
         name='olympiads',
@@ -148,3 +155,6 @@ def upload_to_db():
         if_exists='replace',
         index=False
     )
+
+
+upload_to_db()

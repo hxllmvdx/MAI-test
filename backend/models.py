@@ -68,12 +68,11 @@ class Olympiad(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(255), index=True)
-    description: Mapped[str | None] = mapped_column(String(1024))
     start_date: Mapped[datetime] = mapped_column(DateTime)
     end_date: Mapped[datetime] = mapped_column(DateTime)
-    registration_deadline: Mapped[datetime] = mapped_column(DateTime)
+    duration: Mapped[str] = mapped_column(String(255))
     level: Mapped[str] = mapped_column(String(50))
-    subject: Mapped[str] = mapped_column(String(100))
+    subjects: Mapped[str] = mapped_column(String(100))
     university: Mapped[str] = mapped_column(String(150))
     registration_link: Mapped[str] = mapped_column(String(2048))
 

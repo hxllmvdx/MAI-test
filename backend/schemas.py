@@ -21,12 +21,11 @@ class UserResponse(UserBase):
 
 class OlympiadBase(BaseModel):
     title: str
-    description: Optional[str] = None
     start_date: datetime
     end_date: datetime
-    registration_deadline: datetime
     level: str
-    subject: str
+    duration: str
+    subjects: str
     university: str
     registration_link: HttpUrl
 
