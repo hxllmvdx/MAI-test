@@ -31,7 +31,7 @@ async def authenticate_user(
     password: str
 ) -> Optional[User]:
     user = crud.user_crud.get(db=db, username=username)
-    if not user or not verify_password(password, user.hashed_password):
+    if not user or not verify_password(password, user.password):
         return None
     return user
 
