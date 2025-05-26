@@ -12,15 +12,19 @@ export const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/token", {
-        username,
-        password,
-        grant_type: "password",
-      }, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
+      const params = new URLSearchParams();
+      params.append("username", username);
+      params.append("password", password);
+
+      const response = await axios.post(
+        "http://localhost:8000/login",
+        params.toString(),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
       localStorage.setItem("token", response.data.access_token);
       navigate("/dashboard");
