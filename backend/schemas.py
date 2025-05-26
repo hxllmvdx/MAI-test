@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, HttpUrl
 from typing import List, Optional
 
 class UserBase(BaseModel):
-    email: EmailStr
+    username: str
 
 class UserCreate(UserBase):
     password: str

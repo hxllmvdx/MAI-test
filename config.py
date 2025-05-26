@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 
+
 class Config(BaseSettings):
     # for parser
     first_lvl: list[str]
@@ -9,3 +10,6 @@ class Config(BaseSettings):
     subjects_urls: str
     # database
     db_url: str
+
+
+absolute_path_dotenv = '/Users/matvejsamodanov/PycharmProjects/MAI-python-project/.env'

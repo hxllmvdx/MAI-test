@@ -143,8 +143,11 @@ def upload_to_db():
     df = df.dropna()
 
     df.to_sql(
-        name='olimpiads',
+        name='olympiads',
         con=engine,
         if_exists='replace',
         index=False
     )
+
+
+upload_to_db()
