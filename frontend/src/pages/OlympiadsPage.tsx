@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Olympiad } from "../types/olympiad";
+import axios from "axios";
+import { Olympiad, FilterSettings } from "../types/olympiad";
 import './OlympiadsPage.css';
 
 const OlympiadsPage: React.FC = () => {
@@ -7,88 +8,21 @@ const OlympiadsPage: React.FC = () => {
   const [filteredOlympiads, setFilteredOlympiads] = useState<Olympiad[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterSettings>({
     level: '',
     subject: '',
     university: ''
   });
-  const [participatedOlympiads, setParticipatedOlympiads] = useState<string[]>([]);
+  const [participatedOlympiads, setParticipatedOlympiads] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Mock данные
-        const mockOlympiads: Olympiad[] = [
-          {
-            id: '1',
-            name: 'СПбАстро – Практический тур',
-            time: '10:00 -14:00',
-            date: '02.03.2025',
-            url: 'http://school.astro.spbu.ru/?q=node/670',
-            university: 'СПбАстро',
-            level: 'other',
-            subject: 'астрономия'
-          },
-          {
-            id: '2',
-            name: 'Технокубок – Заключительный тур',
-            time: '10:00 -13:00',
-            date: '02.03.2025',
-            url: 'https://techno-cup.ru/#timetable',
-            university: 'Технокубок',
-            level: 'other',
-            subject: 'информатика'
-          },
-          {
-            id: '3',
-            name: 'Олимпиада ИТМО – Математика',
-            time: '10:00 -14:00',
-            date: '15.03.2025',
-            url: 'https://olymp.itmo.ru/',
-            university: 'Олимпиада ИТМО',
-            level: 'third',
-            subject: 'математика'
-          },
-          {
-            id: '4',
-            name: 'ММО – Первый день',
-            time: '10:00 -14:00',
-            date: '16.03.2025',
-            url: 'https://mmo.mccme.ru/',
-            university: 'ММО',
-            level: 'first',
-            subject: 'математика'
-          },
-          {
-            id: '5',
-            name: 'ММО – Второй день', 
-            time: '10:00 -14:00', 
-            date: '29.03.2025', 
-            url: 'https://mmo.mccme.ru//', 
-            university: 'ММО', 
-            level: 'first',
-            subject: 'математика'
-          },
-          {
-            id: '6',
-            name: 'Олимпиада ИТМО – Информатика',
-            time: '10:00 -14:00',
-            date: '16.03.2025',
-            url: 'https://olymp.itmo.ru/',
-            university: 'Олимпиада ИТМО',
-            level: 'third',
-            subject: 'информатика'
-          }
-        ];
-
-        setOlympiads(mockOlympiads);
-        setFilteredOlympiads(mockOlympiads);
-        
-        // Загрузка истории участия
-        const mockParticipation = ['3', '4'];
-        setParticipatedOlympiads(mockParticipation);
+        const response = await axios.get('http://localhost:8000/olympiads');
+        setOlympiads(response.data);
+        setFilteredOlympiads(response.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Неизвестная ошибка");
+        setError(err instanceof Error ? err.message : "Failed to fetch olympiads");
       } finally {
         setLoading(false);
       }
@@ -104,7 +38,7 @@ const OlympiadsPage: React.FC = () => {
       result = result.filter(o => o.level === filters.level);
     }
     if (filters.subject) {
-      result = result.filter(o => o.subject === filters.subject);
+      result = result.filter(o => o.subjects.includes(filters.subject));
     }
     if (filters.university) {
       result = result.filter(o => 
@@ -120,29 +54,45 @@ const OlympiadsPage: React.FC = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleParticipation = (olympiadId: string) => {
-    setParticipatedOlympiads(prev => 
-      prev.includes(olympiadId) 
-        ? prev.filter(id => id !== olympiadId) 
-        : [...prev, olympiadId]
-    );
-    // Здесь должен быть API вызов для сохранения
+  const handleParticipation = async (olympiadId: number) => {
+    try {
+      if (participatedOlympiads.includes(olympiadId)) {
+        await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setParticipatedOlympiads(prev => prev.filter(id => id !== olympiadId));
+      } else {
+        await axios.post('http://localhost:8000/participations', 
+          { olympiad_id: olympiadId },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        setParticipatedOlympiads(prev => [...prev, olympiadId]);
+      }
+    } catch (err) {
+      console.error('Failed to update participation:', err);
+    }
   };
 
   const getLevelLabel = (level: string) => {
     switch(level) {
-      case 'first': return 'I уровень';
-      case 'second': return 'II уровень';
-      case 'third': return 'III уровень';
+      case '1': return 'I уровень';
+      case '2': return 'II уровень';
+      case '3': return 'III уровень';
       default: return 'Другой';
     }
   };
 
   const getLevelColor = (level: string) => {
     switch(level) {
-      case 'first': return '#3B82F6';
-      case 'second': return '#10B981';
-      case 'third': return '#8B5CF6';
+      case '1': return '#3B82F6';
+      case '2': return '#10B981';
+      case '3': return '#8B5CF6';
       default: return '#6B7280';
     }
   };
@@ -164,10 +114,10 @@ const OlympiadsPage: React.FC = () => {
           <label>Уровень:</label>
           <select className="levels" name="level" value={filters.level} onChange={handleFilterChange}>
             <option value="">Все</option>
-            <option value="first">I уровень</option>
-            <option value="second">II уровень</option>
-            <option value="third">III уровень</option>
-            <option value="other">Другие</option>
+            <option value="1">I уровень</option>
+            <option value="2">II уровень</option>
+            <option value="3">III уровень</option>
+            <option value="-">Другие</option>
           </select>
         </div>
         
@@ -203,7 +153,7 @@ const OlympiadsPage: React.FC = () => {
         {filteredOlympiads.map(olympiad => (
           <div key={olympiad.id} className="olympiad-card">
             <div className="card-header">
-              <h3>{olympiad.name}</h3>
+              <h3>{olympiad.title}</h3>
               <span 
                 className="level-badge"
                 style={{ backgroundColor: getLevelColor(olympiad.level) }}
@@ -216,14 +166,16 @@ const OlympiadsPage: React.FC = () => {
             
             <div className="details">
               <div className="detail">
-                <span>📅 {olympiad.date}</span>
-                <span>🕒 {olympiad.time}</span>
+                <span>📅 Начало: {olympiad.start_date}</span>
+                <span>📅 Конец: {olympiad.end_date}</span>
+                <span>🕒 Длительность: {olympiad.duration}</span>
+                <span>📚 Предметы: {olympiad.subjects}</span>
               </div>
             </div>
             
             <div className="card-footer">
               <a 
-                href={olympiad.url} 
+                href={olympiad.registration_link} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="register-btn"

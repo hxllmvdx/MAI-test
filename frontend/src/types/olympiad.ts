@@ -1,24 +1,33 @@
-
-export interface OlympiadResponse {
+export interface Olympiad {
   id: number;
   title: string;
-  description?: string;
-  start_date: string;  // Будет приходить как строка ISO format
+  start_date: string;
   end_date: string;
-  registration_deadline: string;
+  duration: string;
   level: string;
-  subject: string;
+  subjects: string;
   university: string;
   registration_link: string;
   status: string;
+}
+
+export interface NotificationFilters {
+  olympiads: string[];
+  subjects: string[];
+  levels: string[];
+}
+
+export interface ParticipationHistory {
+  id: string;
+  olympiadId: string;
+  name: string;
+  date: string;
+  participationDate: string;
+  result?: string;
 }
 
 export interface FilterSettings {
   levels?: string[];
   subjects?: string[];
   universities?: string[];
-}
-
-export interface UserFilters extends FilterSettings {
-  selected_olympiads?: number[];
 }
