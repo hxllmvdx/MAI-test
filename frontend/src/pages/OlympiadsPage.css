@@ -234,7 +234,6 @@
   color: #adb5bd;
 }
 
-/* Olympiad cards grid */
 .olympiads-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -244,7 +243,6 @@
   padding: 0 1rem;
 }
 
-/* Card styles */
 .olympiad-card {
   background: white;
   border-radius: 1rem;
@@ -358,7 +356,6 @@
   border-color: #10b981;
 }
 
-/* Loading and error states */
 .loading {
   text-align: center;
   padding: 3rem;
@@ -377,7 +374,6 @@
   margin: 2rem auto;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .olympiads-page h1 {
     font-size: 2rem;

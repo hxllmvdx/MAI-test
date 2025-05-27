@@ -12,22 +12,6 @@ user_selected_olympiad = Table(
     Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True)
 )
 
-user_selected_subject = Table(
-    'user_selected_subject',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True),
-    Column('subject', String(100))
-)
-
-user_selected_level = Table(
-    'user_selected_level',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True),
-    Column('level', String(50))
-)
-
 
 class User(Base):
     __tablename__ = "users"

@@ -1,10 +1,8 @@
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
-import json
 
 from . import crud, schemas, auth, models
 from .database import get_db
@@ -126,6 +124,7 @@ async def get_olympiads(
         for olympiad in olympiads
     ]
 
+
 # Comments endpoints
 @app.post("/olympiads/{olympiad_id}/comments", response_model=schemas.CommentResponse)
 async def create_comment(
@@ -141,12 +140,14 @@ async def create_comment(
         text=comment.text
     )
 
+
 @app.get("/olympiads/{olympiad_id}/comments", response_model=List[schemas.CommentResponse])
 async def get_olympiad_comments(
     olympiad_id: int,
     db: Session = Depends(get_db)
 ):
     return crud.comment_service.get_comments_for_olympiad(db=db, olympiad_id=olympiad_id)
+
 
 # Participation endpoints
 @app.post("/participations", response_model=schemas.ParticipationResponse)
@@ -160,6 +161,7 @@ async def create_participation(
         user_id=current_user.id,
         olympiad_id=participation.olympiad_id
     )
+
 
 @app.delete("/participations/{olympiad_id}")
 async def delete_participation(
@@ -178,6 +180,7 @@ async def delete_participation(
             detail="Participation not found"
         )
     return {"status": "success"}
+
 
 # Notifications endpoints
 @app.get("/notifications", response_model=List[schemas.NotificationResponse])

@@ -26,7 +26,6 @@ const OlympiadsPage: React.FC = () => {
         setOlympiads(olympiadsData);
         setFilteredOlympiads(olympiadsData);
 
-        // Сбор уникальных предметов
         const allSubjects = olympiadsData.flatMap((o: Olympiad) => o.subjects);
         const unique = Array.from(new Set(allSubjects)).filter(s => s.trim() !== "");
         setUniqueSubjects(unique);
@@ -44,18 +43,15 @@ const OlympiadsPage: React.FC = () => {
   useEffect(() => {
     let result = olympiads;
 
-    // Фильтр по уровням (с учетом "Все уровни")
     if (filters.levels?.length && !filters.levels.includes('')) {
       result = result.filter(o => filters.levels.includes(o.level));
     }
 
-    // Фильтр по предметам (с учетом "Все предметы")
     if (filters.subjects?.length && !filters.subjects.includes('')) {
       result = result.filter(o =>
         filters.subjects.some(subj => o.subjects.includes(subj)))
     }
 
-    // Фильтр по университету
     if (searchUniversity) {
       result = result.filter(o =>
         o.university.toLowerCase().includes(searchUniversity.toLowerCase())
@@ -145,7 +141,6 @@ const OlympiadsPage: React.FC = () => {
 
         <div className="filters-container">
           <div className="filters-grid">
-            {/* Фильтр по уровням */}
             <div className="filter-group">
               <label>Уровень</label>
               <div className="custom-dropdown">
@@ -179,8 +174,6 @@ const OlympiadsPage: React.FC = () => {
               </div>
             </div>
 
-
-            {/* Фильтр по предметам */}
             <div className="filter-group">
               <label>Предметы</label>
               <div className="custom-dropdown">
@@ -210,7 +203,6 @@ const OlympiadsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Поиск по университету */}
             <div className="filter-group">
               <label>Олимпиада</label>
               <input
@@ -222,7 +214,6 @@ const OlympiadsPage: React.FC = () => {
               />
             </div>
 
-            {/* Кнопка сброса */}
             <button
                 className="reset-button"
                 onClick={() => {

@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 
 from backend import models
@@ -60,7 +60,6 @@ class OlympiadBase(BaseModel):
             try:
                 return json.loads(v)
             except json.JSONDecodeError:
-                # Если строка не JSON, разбиваем по запятым
                 return [s.strip() for s in v.split(",") if s.strip()]
         return v
 

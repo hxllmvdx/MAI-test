@@ -41,21 +41,15 @@ const ProfilePage: React.FC = () => {
           throw new Error('Invalid data format from server');
         }
 
-        console.log('Данные пользователя:', profileRes.data);
-        console.log('Текущие настройки дней:', profileRes.data.n_days_notice);
-
-        // Установка данных пользователя
         setUsername(profileRes.data.username);
         setNDaysNotice(profileRes.data.n_days_notice);
 
-        // Обработка фильтров
         setNotificationFilters({
           olympiads: profileRes.data.selected_olympiads || [],
           subjects: profileRes.data.selected_subjects || [],
           levels: profileRes.data.selected_levels || []
         });
 
-        // Обработка олимпиад
         const subjects = Array.from(new Set(
           olympiadsRes.data.flatMap((o: Olympiad) => o.subjects || [])
         ));
