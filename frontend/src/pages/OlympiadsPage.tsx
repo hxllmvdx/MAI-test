@@ -16,6 +16,7 @@ const OlympiadsPage: React.FC = () => {
   const [participatedOlympiads, setParticipatedOlympiads] = useState<number[]>([]);
   const [uniqueSubjects, setUniqueSubjects] = useState<string[]>([]);
   const [searchUniversity, setSearchUniversity] = useState("");
+  const [isLevelsOpen, setIsLevelsOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,42 +39,45 @@ const OlympiadsPage: React.FC = () => {
     fetchData();
   }, []);
 
+
+
   useEffect(() => {
     let result = olympiads;
 
-    // Фильтр по уровням
-    if (filters.levels?.length) {
+    // Фильтр по уровням (с учетом "Все уровни")
+    if (filters.levels?.length && !filters.levels.includes('')) {
       result = result.filter(o => filters.levels.includes(o.level));
     }
 
-    // Фильтр по предметам (хотя бы одно совпадение)
-    if (filters.subjects?.length) {
+    // Фильтр по предметам (с учетом "Все предметы")
+    if (filters.subjects?.length && !filters.subjects.includes('')) {
       result = result.filter(o =>
-        filters.subjects.some(subj => o.subjects.includes(subj))
-      );
+        filters.subjects.some(subj => o.subjects.includes(subj)))
     }
 
-    // Фильтр по университету (частичное совпадение)
+    // Фильтр по университету
     if (searchUniversity) {
-      const searchTerm = searchUniversity.toLowerCase();
       result = result.filter(o =>
-        o.university.toLowerCase().includes(searchTerm)
+        o.university.toLowerCase().includes(searchUniversity.toLowerCase())
       );
     }
 
     setFilteredOlympiads(result);
   }, [filters, searchUniversity, olympiads]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, options } = e.target;
-    const selected = Array.from(options)
-      .filter(opt => opt.selected)
-      .map(opt => opt.value);
-    setFilters(prev => ({ ...prev, [name]: selected }));
+    const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
+
+  const toggleSubjectsDropdown = () => {
+    setIsSubjectsOpen(!isSubjectsOpen);
   };
 
-  const handleUniversitySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchUniversity(e.target.value);
+  const handleSubjectCheck = (subject: string) => {
+    setFilters(prev => {
+      const newSubjects = prev.subjects.includes(subject)
+        ? prev.subjects.filter(s => s !== subject)
+        : [...prev.subjects, subject];
+      return { ...prev, subjects: newSubjects };
+    });
   };
 
   const handleParticipation = async (olympiadId: number) => {
@@ -119,6 +123,14 @@ const OlympiadsPage: React.FC = () => {
     }
   };
 
+  const handleLevelSelect = (level: string) => {
+    setFilters(prev => ({
+      ...prev,
+      levels: level ? [level] : []
+    }));
+    setIsLevelsOpen(false);
+  };
+
   if (loading) {
     return <div className="loading">Загрузка...</div>;
   }
@@ -131,51 +143,98 @@ const OlympiadsPage: React.FC = () => {
       <div className="olympiads-page">
         <h1>Календарь олимпиад</h1>
 
-        <div className="filters">
-          <div className="filter-group">
-            <label>Уровень:</label>
-            <select
-                className="level-filter"
-                name="levels"
-                value={filters.levels}
-                onChange={handleFilterChange}
-            >
-              <option value="">Все уровни</option>
-              <option value="1">I уровень</option>
-              <option value="2">II уровень</option>
-              <option value="3">III уровень</option>
-              <option value="-">Другие</option>
-            </select>
-          </div>
+        <div className="filters-container">
+          <div className="filters-grid">
+            {/* Фильтр по уровням */}
+            <div className="filter-group">
+              <label>Уровень</label>
+              <div className="custom-dropdown">
+                <button
+                    className="dropdown-toggle"
+                    onClick={() => setIsLevelsOpen(!isLevelsOpen)}
+                >
+                  {filters.levels[0]
+                      ? getLevelLabel(filters.levels[0])
+                      : 'Все уровни'}
+                </button>
+                {isLevelsOpen && (
+                    <div className="dropdown-menu">
+                      <div
+                          className="dropdown-item"
+                          onClick={() => handleLevelSelect('')}
+                      >
+                        Все уровни
+                      </div>
+                      {['1', '2', '3', '-'].map(level => (
+                          <div
+                              key={level}
+                              className="dropdown-item"
+                              onClick={() => handleLevelSelect(level)}
+                          >
+                            {getLevelLabel(level)}
+                          </div>
+                      ))}
+                    </div>
+                )}
+              </div>
+            </div>
 
-          <div className="filter-group">
-            <label>Предмет:</label>
-            <select
-                className="subject-filter"
-                name="subjects"
-                value={filters.subjects}
-                onChange={handleFilterChange}
-            >
-              <option value="">Все предметы</option>
-              {uniqueSubjects.map(subject => (
-                  <option key={subject} value={subject}>
-                    {subject}
-                  </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="filter-group">
-            <label>Университет:</label>
-            <input
-                type="text"
-                className="university-search"
-                placeholder="Поиск..."
-                value={searchUniversity}
-                onChange={handleUniversitySearch}
-            />
+            {/* Фильтр по предметам */}
+            <div className="filter-group">
+              <label>Предметы</label>
+              <div className="custom-dropdown">
+                <button
+                    className="dropdown-toggle"
+                    onClick={toggleSubjectsDropdown}
+                >
+                  {filters.subjects.length > 0
+                      ? `Выбрано: ${filters.subjects.length}`
+                      : 'Нажмите, чтобы выбрать'}
+                </button>
+                {isSubjectsOpen && (
+                    <div className="dropdown-menu">
+                      {uniqueSubjects.map(subject => (
+                          <label key={subject} className="checkbox-item">
+                            <input
+                                type="checkbox"
+                                checked={filters.subjects.includes(subject)}
+                                onChange={() => handleSubjectCheck(subject)}
+                            />
+                            <span className="checkmark"></span>
+                            {subject}
+                          </label>
+                      ))}
+                    </div>
+                )}
+              </div>
+            </div>
+
+            {/* Поиск по университету */}
+            <div className="filter-group">
+              <label>Олимпиада</label>
+              <input
+                  type="text"
+                  className="filter-control"
+                  placeholder="Введите название..."
+                  value={searchUniversity}
+                  onChange={(e) => setSearchUniversity(e.target.value)}
+              />
+            </div>
+
+            {/* Кнопка сброса */}
+            <button
+                className="reset-button"
+                onClick={() => {
+                  setFilters({levels: [], subjects: [], universities: []});
+                  setSearchUniversity('');
+                }}
+            >
+              Сбросить всё
+            </button>
           </div>
         </div>
+
 
         <div className="olympiads-grid">
           {filteredOlympiads.map(olympiad => (
