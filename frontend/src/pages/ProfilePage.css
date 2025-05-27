@@ -228,6 +228,35 @@ body {
   text-align: center;
 }
 
+.status-messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.success-message {
+  background: #dff0d8;
+  color: #3c763d;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.error-message {
+  background: #f2dede;
+  color: #a94442;
+  padding: 15px;
+  border-radius: 5px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .checkbox-group {
