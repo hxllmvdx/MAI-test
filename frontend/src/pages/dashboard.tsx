@@ -2,15 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import './dashboard.css';
-
-interface Olympiad {
-  id: number;
-  title: string;
-  start_date: string;
-  registration_link: string;
-  level: string;
-  parsed_subjects: string[];
-}
+import { Olympiad } from "../types/olympiad.ts";
 
 interface UserFilters {
   selected_olympiads: number[];
@@ -70,14 +62,18 @@ export const Dashboard = () => {
               l.trim().toLowerCase() === olympiad.level?.trim().toLowerCase()
             );
 
+          const normalizedSelectedSubjects = filters.selected_subjects
+            .map(subj => subj.trim().toLowerCase());
+
+          const normalizedOlympiadSubjects = olympiad.subjects
+            ? olympiad.subjects.map(subj => subj.trim().toLowerCase())
+            : [];
+
           const subjectMatch =
-            filters.selected_subjects.length === 0 ||
-            (filters.selected_subjects.some(filterSubj =>
-              olympiad.parsed_subjects?.some(olympiadSubj =>
-                filterSubj.trim().toLowerCase() === olympiadSubj.trim().toLowerCase()
-              )
-            ));
-          console.log("Olympiads", olympiad.parsed_subjects);
+            normalizedSelectedSubjects.length === 0 ||
+            normalizedSelectedSubjects.every(filterSubj =>
+              normalizedOlympiadSubjects.includes(filterSubj)
+            );
 
           return levelMatch && subjectMatch;
         });
