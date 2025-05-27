@@ -69,15 +69,25 @@ async def read_users_me(
 
 @app.put("/profile", response_model=schemas.UserResponse)
 async def update_profile(
-    user_update: schemas.UserUpdate,
-    current_user: User = Depends(auth.get_current_user),
-    db: Session = Depends(get_db)
+        user_update: schemas.UserUpdate,
+        current_user: User = Depends(auth.get_current_user),
+        db: Session = Depends(get_db)
 ):
-    return crud.user_crud.update(
+    updated_user = crud.user_crud.update(
         db=db,
         filters={"id": current_user.id},
         **user_update.dict(exclude_unset=True)
     )
+
+    db.refresh(updated_user)
+    user_with_olympiads = (
+        db.query(models.User)
+        .options(joinedload(models.User.selected_olympiads))
+        .filter(models.User.id == updated_user.id)
+        .first()
+    )
+
+    return schemas.UserResponse.from_orm(user_with_olympiads)
 
 
 @app.get("/profile", response_model=schemas.UserResponse)
@@ -107,7 +117,6 @@ async def get_olympiads(
 ):
     olympiads = crud.filter_service.get_filtered_olympiads(db, filters.dict(exclude_unset=True))
 
-    # Создаем ответ, исключая исходное поле subjects
     return [
         schemas.OlympiadResponse(
             **{k: v for k, v in olympiad.__dict__.items() if k != "subjects"},
