@@ -55,14 +55,16 @@ class BaseCRUD:
         obj = self.get(db, **filters)
         if not obj:
             return None
+
         try:
+            if "selected_olympiads" in data:
+                olympiad_ids = data.pop("selected_olympiads")
+                olympiads = db.query(Olympiad).filter(Olympiad.id.in_(olympiad_ids)).all()
+                obj.selected_olympiads = olympiads
+
             for key, value in data.items():
-                if key == 'selected_olympiads':
-                    obj.selected_olympiads = db.query(Olympiad).filter(
-                        Olympiad.id.in_(value)
-                    ).all()
-                else:
-                    setattr(obj, key, value)
+                setattr(obj, key, value)
+
             db.commit()
             db.refresh(obj)
             return obj

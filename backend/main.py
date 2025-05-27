@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import json
 
 from . import crud, schemas, auth, models
@@ -55,9 +55,16 @@ async def login(
 # User profile endpoints
 @app.get("/users/me", response_model=schemas.UserResponse)
 async def read_users_me(
-    current_user: User = Depends(auth.get_current_user)
+    current_user: User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
 ):
-    return current_user
+    user = (
+        db.query(models.User)
+        .options(joinedload(models.User.selected_olympiads))
+        .filter(models.User.id == current_user.id)
+        .first()
+    )
+    return schemas.UserResponse.from_orm(user)
 
 
 @app.put("/profile", response_model=schemas.UserResponse)
@@ -78,9 +85,13 @@ async def get_profile_data(
     current_user: User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Явно загружаем связи
-    db.refresh(current_user, ['selected_olympiads'])
-    return schemas.UserResponse.from_orm(current_user)
+    user = (
+        db.query(models.User)
+        .options(joinedload(models.User.selected_olympiads))
+        .filter(models.User.id == current_user.id)
+        .first()
+    )
+    return schemas.UserResponse.from_orm(user)
 
 
 @app.get("/all-olympiads", response_model=List[schemas.OlympiadResponse])

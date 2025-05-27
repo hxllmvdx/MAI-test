@@ -37,13 +37,10 @@ class UserResponse(UserBase):
             is_active=user.is_active,
             n_days_notice=user.n_days_notice,
             selected_olympiads=[ol.id for ol in user.selected_olympiads],
-            selected_subjects=list({
-                subj
-                for ol in user.selected_olympiads
-                for subj in ol.parsed_subjects
-            }),
-            selected_levels=list({ol.level for ol in user.selected_olympiads})
+            selected_subjects=user.selected_subjects,
+            selected_levels=user.selected_levels
         )
+
 
 class OlympiadBase(BaseModel):
     title: str

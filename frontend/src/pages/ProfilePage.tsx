@@ -82,20 +82,15 @@ const ProfilePage: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put('/profile', {
+      await axios.put('http://localhost:8000/profile', {
         n_days_notice: nDaysNotice,
         selected_olympiads: notificationFilters.olympiads,
         selected_subjects: notificationFilters.subjects,
         selected_levels: notificationFilters.levels
       }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`
-        }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      alert('Изменения успешно сохранены');
     } catch (err) {
-      setError('Ошибка сохранения изменений');
-      console.error(err);
     }
   };
 
@@ -169,15 +164,15 @@ const ProfilePage: React.FC = () => {
         <div className="settings-section">
           <h3>Уровни олимпиад</h3>
           <div className="checkbox-group">
-            {['first', 'second', 'third'].map(level => (
+            {['1', '2', '3'].map(level => (
                 <label key={level} className="checkbox-label">
                   <input
                       type="checkbox"
                       checked={notificationFilters.levels.includes(level)}
                       onChange={() => handleFilterChange('levels', level)}
                   />
-                  {level === 'first' ? 'I уровень' :
-                      level === 'second' ? 'II уровень' : 'III уровень'}
+                  {level === '1' ? 'I уровень' :
+                      level === '2' ? 'II уровень' : 'III уровень'}
                 </label>
             ))}
           </div>

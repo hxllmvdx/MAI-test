@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from .database import Base
 
-# models.py
 user_selected_olympiad = Table(
     'user_selected_olympiad',
     Base.metadata,
@@ -45,26 +44,12 @@ class User(Base):
 
     selected_olympiads: Mapped[list["Olympiad"]] = relationship(
         secondary=user_selected_olympiad,
-        back_populates="subscribed_users"
+        back_populates="subscribed_users",
+        lazy="selectin"
     )
 
-    selected_subjects: Mapped[list["Olympiad"]] = relationship(
-        secondary=user_selected_subject,
-        primaryjoin="User.id == user_selected_subject.c.user_id",
-        secondaryjoin="Olympiad.id == user_selected_subject.c.olympiad_id",
-        foreign_keys="[user_selected_subject.c.user_id, user_selected_subject.c.olympiad_id]",
-        viewonly=True,
-        overlaps="subscribed_users"
-    )
-
-    selected_levels: Mapped[list["Olympiad"]] = relationship(
-        secondary=user_selected_level,
-        primaryjoin="User.id == user_selected_level.c.user_id",
-        secondaryjoin="Olympiad.id == user_selected_level.c.olympiad_id",
-        foreign_keys="[user_selected_level.c.user_id, user_selected_level.c.olympiad_id]",
-        viewonly=True,
-        overlaps="subscribed_users"
-    )
+    selected_subjects: Mapped[list[str]] = mapped_column(JSON, default=list)
+    selected_levels: Mapped[list[str]] = mapped_column(JSON, default=list)
 
 
 class Olympiad(Base):
@@ -72,8 +57,8 @@ class Olympiad(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(255), index=True)
-    start_date: Mapped[str] = mapped_column(String(10))  # Changed to String to store dd.mm.yyyy
-    end_date: Mapped[str] = mapped_column(String(10))  # Changed to String to store dd.mm.yyyy
+    start_date: Mapped[str] = mapped_column(String(10))
+    end_date: Mapped[str] = mapped_column(String(10))
     duration: Mapped[str] = mapped_column(String(255))
     level: Mapped[str] = mapped_column(String(50))
     subjects: Mapped[str] = mapped_column(String(100))
@@ -82,27 +67,12 @@ class Olympiad(Base):
 
     comments: Mapped[list["Comment"]] = relationship(back_populates="olympiad")
     participations: Mapped[list["Participation"]] = relationship(back_populates="olympiad")
+
     subscribed_users: Mapped[list["User"]] = relationship(
         secondary=user_selected_olympiad,
-        back_populates="selected_olympiads"
-    )
-
-    subscribed_by_subject: Mapped[list["User"]] = relationship(
-        secondary=user_selected_subject,
-        primaryjoin="Olympiad.id == user_selected_subject.c.olympiad_id",
-        secondaryjoin="User.id == user_selected_subject.c.user_id",
-        foreign_keys="[user_selected_subject.c.olympiad_id, user_selected_subject.c.user_id]",
-        back_populates="selected_subjects",
-        overlaps="selected_subjects"
-    )
-
-    subscribed_by_level: Mapped[list["User"]] = relationship(
-        secondary=user_selected_level,
-        primaryjoin="Olympiad.id == user_selected_level.c.olympiad_id",
-        secondaryjoin="User.id == user_selected_level.c.user_id",
-        foreign_keys="[user_selected_level.c.olympiad_id, user_selected_level.c.user_id]",
-        back_populates="selected_levels",
-        overlaps="selected_levels"
+        back_populates="selected_olympiads",
+        primaryjoin="Olympiad.id == user_selected_olympiad.c.olympiad_id",
+        secondaryjoin="User.id == user_selected_olympiad.c.user_id"
     )
 
     @hybrid_property
