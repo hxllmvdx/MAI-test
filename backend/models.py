@@ -5,8 +5,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from .database import Base
 
+# models.py
 user_selected_olympiad = Table(
-    'user_selected_olympiad', Base.metadata,
+    'user_selected_olympiad',
+    Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True)
 )
@@ -16,7 +18,7 @@ user_selected_subject = Table(
     Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True),
-    Column('subject', String(100))  # Просто хранит subject без ForeignKey
+    Column('subject', String(100))
 )
 
 user_selected_level = Table(
@@ -24,7 +26,7 @@ user_selected_level = Table(
     Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('olympiad_id', Integer, ForeignKey('olympiads.id'), primary_key=True),
-    Column('level', String(50))  # Просто хранит level без ForeignKey
+    Column('level', String(50))
 )
 
 

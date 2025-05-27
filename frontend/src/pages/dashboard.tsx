@@ -46,13 +46,22 @@ export const Dashboard = () => {
     navigate("/olympiads");
   };
 
-  const handleProfileClick = () => {
-    if (isGuest) {
-      alert("Please register or login to access profile");
-      return;
-    }
+const handleProfileClick = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+
+  try {
+    await axios.get("/profile", { headers: { Authorization: `Bearer ${token}` } });
     navigate("/profile");
-  };
+  } catch (err) {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
+};
 
   return (
     <div className="dashboard-container">

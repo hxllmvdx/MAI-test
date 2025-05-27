@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { Olympiad, NotificationFilters, ParticipationHistory } from '../types/olympiad';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [nDaysNotice, setNDaysNotice] = useState(7);
   const [notificationFilters, setNotificationFilters] = useState<NotificationFilters>({
     olympiads: [],
     subjects: [],
@@ -10,149 +15,188 @@ const ProfilePage: React.FC = () => {
   });
   const [participationHistory, setParticipationHistory] = useState<ParticipationHistory[]>([]);
   const [availableOlympiads, setAvailableOlympiads] = useState<Olympiad[]>([]);
+  const [uniqueSubjects, setUniqueSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       try {
-        // Mock данные
-        const mockOlympiads: Olympiad[] = [
-          {
-            id: '1',
-            name: 'СПбАстро – Практический тур',
-            time: '10:00 -14:00',
-            date: '02.03.2025',
-            url: 'http://school.astro.spbu.ru/?q=node/670',
-            university: 'СПбАстро',
-            level: 'other',
-            subject: 'астрономия'
-          },
-          // ... другие олимпиады
-        ];
+        const [profileRes, olympiadsRes] = await Promise.all([
+          axios.get('http://localhost:8000/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get('http://localhost:8000/all-olympiads')
+        ]);
 
-        const mockFilters: NotificationFilters = {
-          olympiads: ['1'],
-          subjects: ['математика'],
-          levels: ['first', 'second']
-        };
+        if (!Array.isArray(olympiadsRes.data)) {
+          throw new Error('Invalid data format from server');
+        }
 
-        const mockHistory: ParticipationHistory[] = [
-          {
-            id: '1',
-            olympiadId: '3',
-            name: 'Олимпиада ИТМО – Математика',
-            date: '15.03.2025',
-            participationDate: '15.03.2025',
-            result: 'Победитель'
-          }
-        ];
+        console.log('Данные пользователя:', profileRes.data);
+        console.log('Текущие настройки дней:', profileRes.data.n_days_notice);
 
-        setAvailableOlympiads(mockOlympiads);
-        setNotificationFilters(mockFilters);
-        setParticipationHistory(mockHistory);
+        // Установка данных пользователя
+        setUsername(profileRes.data.username);
+        setNDaysNotice(profileRes.data.n_days_notice);
+
+        // Обработка фильтров
+        setNotificationFilters({
+          olympiads: profileRes.data.selected_olympiads || [],
+          subjects: profileRes.data.selected_subjects || [],
+          levels: profileRes.data.selected_levels || []
+        });
+
+        // Обработка олимпиад
+        const subjects = Array.from(new Set(
+          olympiadsRes.data.flatMap((o: Olympiad) => o.subjects || [])
+        ));
+        setUniqueSubjects(subjects);
+        setAvailableOlympiads(olympiadsRes.data);
+
       } catch (err) {
-        console.error('Ошибка загрузки данных:', err);
+        setError('Ошибка загрузки данных профиля');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleFilterChange = (type: keyof NotificationFilters, value: string) => {
-    setNotificationFilters(prev => {
-      const currentValues = [...prev[type]];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
-      
-      return { ...prev, [type]: newValues };
-    });
-    // Здесь должен быть API вызов для сохранения
+    setNotificationFilters(prev => ({
+      ...prev,
+      [type]: prev[type].includes(value)
+        ? prev[type].filter(v => v !== value)
+        : [...prev[type], value]
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      await axios.put('/profile', {
+        n_days_notice: nDaysNotice,
+        selected_olympiads: notificationFilters.olympiads,
+        selected_subjects: notificationFilters.subjects,
+        selected_levels: notificationFilters.levels
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      alert('Изменения успешно сохранены');
+    } catch (err) {
+      setError('Ошибка сохранения изменений');
+      console.error(err);
+    }
   };
 
   const removeFromHistory = (id: string) => {
     setParticipationHistory(prev => prev.filter(item => item.id !== id));
-    // Здесь должен быть API вызов для удаления
   };
 
   if (loading) {
     return <div className="loading">Загрузка профиля...</div>;
   }
 
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
   return (
     <div className="profile-page">
-        <h1>Мой профиль</h1>
-      
-      
+      <h1>Ваш профиль</h1>
+
+      <div className="user-info-section">
+        <p className="username-info">Имя пользователя: {username}</p>
+      </div>
+
       <section className="notification-settings">
-        <h2 className='notifications-h'>Настройки уведомлений</h2>
-        
-        <div className="settings-section">
-          <h3 className='notifications-h'>Конкретные олимпиады</h3>
-            <div className="checkbox-group">
-                {availableOlympiads.map(olympiad => (
-                <label key={olympiad.id} className="checkbox-label">
-                <input
-                    type="checkbox"
-                    checked={notificationFilters.olympiads.includes(olympiad.id)}
-                    onChange={() => handleFilterChange('olympiads', olympiad.id)}
-                />
-                <span>{olympiad.name}</span>
-                </label>
-            ))}
-            </div>
+        <h2 className="notifications-h">Настройки уведомлений</h2>
+
+        <div className="days-notice-section">
+          <h3>Дни до уведомления</h3>
+          <input
+              type="number"
+              value={nDaysNotice}
+              onChange={(e) => setNDaysNotice(Number(e.target.value))}
+              min="1"
+              max="30"
+              className="notice-input"
+          />
         </div>
-        
+
         <div className="settings-section">
-          <h3>Предметы</h3>
+          <h3>Конкретные олимпиады</h3>
           <div className="checkbox-group">
-            {['математика', 'информатика', 'астрономия'].map(subject => (
-              <label key={subject} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notificationFilters.subjects.includes(subject)}
-                  onChange={() => handleFilterChange('subjects', subject)}
-                />
-                {subject}
-              </label>
+            {availableOlympiads.map(olympiad => (
+                <label key={olympiad.id} className="checkbox-label">
+                  <input
+                      type="checkbox"
+                      checked={notificationFilters.olympiads.includes(olympiad.id)}
+                      onChange={() => handleFilterChange('olympiads', olympiad.id)}
+                  />
+                  <span>{olympiad.title}</span>
+                </label>
             ))}
           </div>
         </div>
-        
+
+        <div className="settings-section">
+          <h3>Предметы</h3>
+          <div className="checkbox-group">
+            {uniqueSubjects.map(subject => (
+                <label key={subject} className="checkbox-label">
+                  <input
+                      type="checkbox"
+                      checked={notificationFilters.subjects.includes(subject)}
+                      onChange={() => handleFilterChange('subjects', subject)}
+                  />
+                  {subject}
+                </label>
+            ))}
+          </div>
+        </div>
+
         <div className="settings-section">
           <h3>Уровни олимпиад</h3>
           <div className="checkbox-group">
             {['first', 'second', 'third'].map(level => (
-              <label key={level} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notificationFilters.levels.includes(level)}
-                  onChange={() => handleFilterChange('levels', level)}
-                />
-                {level === 'first' ? 'I уровень' : 
-                 level === 'second' ? 'II уровень' : 'III уровень'}
-              </label>
+                <label key={level} className="checkbox-label">
+                  <input
+                      type="checkbox"
+                      checked={notificationFilters.levels.includes(level)}
+                      onChange={() => handleFilterChange('levels', level)}
+                  />
+                  {level === 'first' ? 'I уровень' :
+                      level === 'second' ? 'II уровень' : 'III уровень'}
+                </label>
             ))}
           </div>
         </div>
       </section>
-      
+
       <section className="participation-history">
         <h2>История участия</h2>
-        
         {participationHistory.length > 0 ? (
-          <div className="history-list">
-            {participationHistory.map(item => (
-              <div key={item.id} className="history-item">
-                <div className="item-info">
+            <div className="history-list">
+              {participationHistory.map(item => (
+                  <div key={item.id} className="history-item">
+                    <div className="item-info">
                   <h4>{item.name}</h4>
                   <p>Дата олимпиады: {item.date}</p>
                   <p>Участие: {item.participationDate}</p>
                   {item.result && <p>Результат: <strong>{item.result}</strong></p>}
                 </div>
-                <button 
+                <button
                   onClick={() => removeFromHistory(item.id)}
                   className="remove-btn"
                 >
@@ -165,6 +209,10 @@ const ProfilePage: React.FC = () => {
           <p className="no-history">Вы еще не участвовали в олимпиадах</p>
         )}
       </section>
+
+      <button onClick={handleSave} className="save-button">
+        Сохранить изменения
+      </button>
     </div>
   );
 };

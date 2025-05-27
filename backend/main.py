@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Auth endpoints
 @app.post("/register", response_model=schemas.UserResponse)
 async def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -50,6 +51,7 @@ async def login(
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 # User profile endpoints
 @app.get("/users/me", response_model=schemas.UserResponse)
 async def read_users_me(
@@ -57,8 +59,9 @@ async def read_users_me(
 ):
     return current_user
 
+
 @app.put("/profile", response_model=schemas.UserResponse)
-async def update_user_profile(
+async def update_profile(
     user_update: schemas.UserUpdate,
     current_user: User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
@@ -68,6 +71,22 @@ async def update_user_profile(
         filters={"id": current_user.id},
         **user_update.dict(exclude_unset=True)
     )
+
+
+@app.get("/profile", response_model=schemas.UserResponse)
+async def get_profile_data(
+    current_user: User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Явно загружаем связи
+    db.refresh(current_user, ['selected_olympiads'])
+    return schemas.UserResponse.from_orm(current_user)
+
+
+@app.get("/all-olympiads", response_model=List[schemas.OlympiadResponse])
+async def get_all_olympiads(db: Session = Depends(get_db)):
+    return db.query(models.Olympiad).all()
+
 
 # Olympiad endpoints
 @app.get("/olympiads", response_model=List[schemas.OlympiadResponse])

@@ -51,19 +51,18 @@ class BaseCRUD:
             query = query.filter_by(**filters)
         return query.offset(skip).limit(limit).all()
 
-    def update(
-            self,
-            db: Session,
-            filters: Dict[str, Any],
-            **data: Any
-    ) -> Optional[ModelType]:
-        """Обновление объекта по фильтрам."""
+    def update(self, db: Session, filters: Dict[str, Any], **data: Any) -> Optional[ModelType]:
         obj = self.get(db, **filters)
         if not obj:
             return None
         try:
             for key, value in data.items():
-                setattr(obj, key, value)
+                if key == 'selected_olympiads':
+                    obj.selected_olympiads = db.query(Olympiad).filter(
+                        Olympiad.id.in_(value)
+                    ).all()
+                else:
+                    setattr(obj, key, value)
             db.commit()
             db.refresh(obj)
             return obj
