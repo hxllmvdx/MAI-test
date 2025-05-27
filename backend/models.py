@@ -26,6 +26,7 @@ user_selected_level = Table(
     Column('level', String(50))  # Просто хранит level без ForeignKey
 )
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -34,7 +35,6 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(1024))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     n_days_notice: Mapped[int] = mapped_column(Integer, default=7)
-
 
     participations: Mapped[list["Participation"]] = relationship(back_populates="user")
     comments: Mapped[list["Comment"]] = relationship(back_populates="author")
@@ -63,13 +63,14 @@ class User(Base):
         overlaps="subscribed_users"
     )
 
+
 class Olympiad(Base):
     __tablename__ = "olympiads"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(255), index=True)
-    start_date: Mapped[datetime] = mapped_column(DateTime)
-    end_date: Mapped[datetime] = mapped_column(DateTime)
+    start_date: Mapped[str] = mapped_column(String(10))  # Changed to String to store dd.mm.yyyy
+    end_date: Mapped[str] = mapped_column(String(10))  # Changed to String to store dd.mm.yyyy
     duration: Mapped[str] = mapped_column(String(255))
     level: Mapped[str] = mapped_column(String(50))
     subjects: Mapped[str] = mapped_column(String(100))
@@ -103,7 +104,12 @@ class Olympiad(Base):
 
     @hybrid_property
     def status(self) -> str:
-        return "completed" if datetime.now() > self.end_date else "upcoming"
+        try:
+            end_date = datetime.strptime(self.end_date, "%d.%m.%Y")
+            return "completed" if datetime.now() > end_date else "upcoming"
+        except ValueError:
+            return "unknown"
+
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -118,6 +124,7 @@ class Comment(Base):
     author: Mapped["User"] = relationship(back_populates="comments")
     olympiad: Mapped["Olympiad"] = relationship(back_populates="comments")
 
+
 class Participation(Base):
     __tablename__ = "participations"
 
@@ -127,6 +134,7 @@ class Participation(Base):
 
     user: Mapped["User"] = relationship(back_populates="participations")
     olympiad: Mapped["Olympiad"] = relationship(back_populates="participations")
+
 
 class Notification(Base):
     __tablename__ = "notifications"
@@ -138,6 +146,6 @@ class Notification(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"))
-    
+
     user: Mapped["User"] = relationship(back_populates="notifications")
     olympiad: Mapped["Olympiad"] = relationship()
