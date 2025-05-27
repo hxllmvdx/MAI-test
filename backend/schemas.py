@@ -1,5 +1,6 @@
+import json
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, HttpUrl
+from pydantic import BaseModel, EmailStr, HttpUrl, field_validator
 from typing import List, Optional
 
 class UserBase(BaseModel):
@@ -25,9 +26,21 @@ class OlympiadBase(BaseModel):
     end_date: str
     level: str
     duration: str
-    subjects: str
     university: str
     registration_link: str
+    subjects: list[str]
+
+    @field_validator("subjects", mode="before")
+    def parse_subjects(cls, v):
+        if isinstance(v, str):
+            if v.strip() == "-":
+                return []
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # Если строка не JSON, разбиваем по запятым
+                return [s.strip() for s in v.split(",") if s.strip()]
+        return v
 
 class OlympiadCreate(OlympiadBase):
     pass
@@ -35,6 +48,7 @@ class OlympiadCreate(OlympiadBase):
 class OlympiadResponse(OlympiadBase):
     id: int
     status: str
+    subjects: list[str]
 
     class Config:
         from_attributes = True

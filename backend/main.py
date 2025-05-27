@@ -4,8 +4,9 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import json
 
-from . import crud, schemas, auth
+from . import crud, schemas, auth, models
 from .database import get_db
 from .models import User
 
@@ -71,13 +72,20 @@ async def update_user_profile(
 # Olympiad endpoints
 @app.get("/olympiads", response_model=List[schemas.OlympiadResponse])
 async def get_olympiads(
-    filters: schemas.FilterSettings = Depends(),
-    db: Session = Depends(get_db)
+        filters: schemas.FilterSettings = Depends(),
+        db: Session = Depends(get_db)
 ):
-    return crud.filter_service.get_filtered_olympiads(
-        db=db,
-        filters=filters.dict(exclude_unset=True)
-    )
+    olympiads = crud.filter_service.get_filtered_olympiads(db, filters.dict(exclude_unset=True))
+
+    # Создаем ответ, исключая исходное поле subjects
+    return [
+        schemas.OlympiadResponse(
+            **{k: v for k, v in olympiad.__dict__.items() if k != "subjects"},
+            subjects=olympiad.parsed_subjects,
+            status=olympiad.status
+        )
+        for olympiad in olympiads
+    ]
 
 # Comments endpoints
 @app.post("/olympiads/{olympiad_id}/comments", response_model=schemas.CommentResponse)

@@ -12,4 +12,4 @@ class Config(BaseSettings):
     db_url: str
 
 
-absolute_path_dotenv = '/Users/matvejsamodanov/PycharmProjects/MAI-python-project/.env'
+absolute_path_dotenv = '/Users/matvejsamodanov/PycharmProjects/MAI-test/.env'

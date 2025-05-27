@@ -48,15 +48,15 @@ def get_subjects(url: str, all_name_university: list):
 
                 try:
                     if 'Подготовка' in university_site.find("div", class_="su-tabs-nav").text:
-                        temp[name] = f"{subjects_list_clear}"
+                        temp[name] = f"{subjects_list_clear}".replace('\'', "\"")
                     else:
-                        temp[name] = '-'
+                        temp[name] = "-"
                 except:
                     pass
 
     for name in all_name_university:
         if name not in temp:
-            temp[name] = '-'
+            temp[name] = "-"
 
     for k, v in temp.items():
         result['title'] = result.get('title', []) + [k]

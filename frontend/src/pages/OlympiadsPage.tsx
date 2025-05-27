@@ -32,27 +32,34 @@ const OlympiadsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let result = olympiads;
+      let result = olympiads;
 
-    // if (filters.levels) {
-    //   result = result.filter(o => o.level === filters.levels);
-    // }
-    // if (filters.subjects) {
-    //   result = result.filter(o => o.subjects.includes(filters.subjects));
-    // }
-    // if (filters.universities) {
-    //   result = result.filter(o =>
-    //     o.university.toLowerCase().includes(filters.universities.toLowerCase())
-    //   );
-    // }
+      if (filters.subjects?.length) {
+        result = result.filter(o =>
+          filters.subjects.every(subj => o.subjects.includes(subj))
+        );
+      }
+    if (filters.levels && filters.levels.length > 0) {
+        result = result.filter(o => filters.levels.includes(o.level));
+    }
+    if (filters.universities && filters.universities.length > 0) {
+        result = result.filter(o =>
+            filters.universities.some(uni =>
+                o.university.toLowerCase().includes(uni.toLowerCase())
+            )
+        );
+    }
 
     setFilteredOlympiads(result);
-  }, [filters, olympiads]);
+}, [filters, olympiads]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
-  };
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, options } = e.target;
+    const selected = Array.from(options)
+        .filter(opt => opt.selected)
+        .map(opt => opt.value);
+    setFilters(prev => ({ ...prev, [name]: selected }));
+};
 
   const handleParticipation = async (olympiadId: number) => {
     try {
@@ -124,12 +131,12 @@ const OlympiadsPage: React.FC = () => {
         <div className="filter-group">
           <label>Предмет:</label>
           <select
-            className="subjects"
-            name="subject"
-            value={filters.subjects}
-            onChange={handleFilterChange}
+              className="subjects"
+              name="subjects"
+              multiple  // Добавлено для множественного выбора
+              value={filters.subjects}
+              onChange={handleFilterChange}
           >
-            <option value="">Все</option>
             <option value="математика">Математика</option>
             <option value="информатика">Информатика</option>
             <option value="астрономия">Астрономия</option>
@@ -139,25 +146,25 @@ const OlympiadsPage: React.FC = () => {
         <div className="filter-group">
           <label>Университет:</label>
           <input
-            className="search"
-            type="text"
-            name="university"
-            placeholder="Поиск..."
-            value={filters.universities}
-            onChange={handleFilterChange}
+              className="search"
+              type="text"
+              name="university"
+              placeholder="Поиск..."
+              value={filters.universities}
+              onChange={handleFilterChange}
           />
         </div>
       </div>
 
       <div className="olympiads-grid">
         {filteredOlympiads.map(olympiad => (
-          <div key={olympiad.id} className="olympiad-card">
-            <div className="card-header">
-              <h3>{olympiad.title}</h3>
-              <span
-                className="level-badge"
-                style={{ backgroundColor: getLevelColor(olympiad.level) }}
-              >
+            <div key={olympiad.id} className="olympiad-card">
+              <div className="card-header">
+                <h3>{olympiad.title}</h3>
+                <span
+                    className="level-badge"
+                    style={{backgroundColor: getLevelColor(olympiad.level)}}
+                >
                 {getLevelLabel(olympiad.level)}
               </span>
             </div>
@@ -169,20 +176,24 @@ const OlympiadsPage: React.FC = () => {
                 <span>📅 Начало: {olympiad.start_date}</span>
                 <span>📅 Конец: {olympiad.end_date}</span>
                 <span>🕒 Длительность: {olympiad.duration}</span>
-                <span>📚 Предметы: {olympiad.subjects}</span>
+                <span>📚 Предметы: {
+                  olympiad.subjects.length > 0
+                      ? olympiad.subjects.join(", ")
+                      : "Нет данных"
+                }</span>
               </div>
             </div>
 
-            <div className="card-footer">
-              <a
-                href={olympiad.registration_link}
-                target="_blank" 
+              <div className="card-footer">
+                <a
+                    href={olympiad.registration_link}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="register-btn"
               >
                 Регистрация
               </a>
-              
+
               <button
                 onClick={() => handleParticipation(olympiad.id)}
                 className={`participation-btn ${

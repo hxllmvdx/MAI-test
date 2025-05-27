@@ -1,5 +1,6 @@
+import json
 from datetime import datetime
-from sqlalchemy import ForeignKey, String, DateTime, Boolean, Integer, Table, Column
+from sqlalchemy import ForeignKey, String, DateTime, Boolean, Integer, Table, Column, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from .database import Base
@@ -109,6 +110,15 @@ class Olympiad(Base):
             return "completed" if datetime.now() > end_date else "upcoming"
         except ValueError:
             return "unknown"
+
+    @hybrid_property
+    def parsed_subjects(self) -> list:
+        if self.subjects.strip() == "-":
+            return []
+        try:
+            return json.loads(self.subjects)
+        except json.JSONDecodeError:
+            return [s.strip() for s in self.subjects.split(",")]
 
 
 class Comment(Base):

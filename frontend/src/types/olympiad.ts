@@ -5,7 +5,7 @@ export interface Olympiad {
   end_date: string;
   duration: string;
   level: string;
-  subjects: string;
+  subjects: string[];
   university: string;
   registration_link: string;
   status: string;

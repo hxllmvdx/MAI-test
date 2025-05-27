@@ -1,9 +1,10 @@
 from typing import Any, Dict, List, Optional, Type, TypeVar
-from sqlalchemy import and_, exc
+from sqlalchemy import and_, exc, func
 from sqlalchemy.orm import Session, joinedload
 from backend.models import Base, User, Olympiad, Participation, Notification, Comment
 from passlib.context import CryptContext
 from backend.auth import get_password_hash
+import json
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ModelType = TypeVar("ModelType", bound=Base)
@@ -21,6 +22,8 @@ class BaseCRUD:
         try:
             if self.model == User and "password" in data:
                 data["password"] = get_password_hash(data.pop("password"))
+            if "subjects" in data and isinstance(data["subjects"], list):
+                data["subjects"] = json.dumps(data["subjects"], ensure_ascii=False)
             obj = self.model(**data)
             db.add(obj)
             db.commit()
@@ -183,19 +186,20 @@ class NotificationService:
 class OlympiadFilterService:
     """Сервис фильтрации олимпиад по различным критериям."""
 
-    def get_filtered_olympiads(
-            self,
-            db: Session,
-            filters: Dict[str, Any]
-    ) -> List[Olympiad]:
-        """Фильтрация олимпиад с обработкой пустых значений."""
+    def get_filtered_olympiads(self, db: Session, filters: Dict[str, Any]) -> List[Olympiad]:
         query = db.query(Olympiad)
 
         if levels := filters.get("levels"):
             query = query.filter(Olympiad.level.in_(levels))
 
         if subjects := filters.get("subjects"):
-            query = query.filter(Olympiad.subject.in_(subjects))
+            # Используем JSON-содержимое для фильтрации
+            subjects_conditions = []
+            for subj in subjects:
+                subjects_conditions.append(
+                    func.json_contains(Olympiad.subjects, json.dumps(subj))
+                )
+            query = query.filter(and_(*subjects_conditions))
 
         if universities := filters.get("universities"):
             query = query.filter(Olympiad.university.in_(universities))
