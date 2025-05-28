@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Olympiad, FilterSettings } from "../types/olympiad";
 import './OlympiadsPage.css';
+import {userInfo} from "node:os";
 
 const OlympiadsPage: React.FC = () => {
   const [olympiads, setOlympiads] = useState<Olympiad[]>([]);
@@ -19,22 +20,15 @@ const OlympiadsPage: React.FC = () => {
   const [isLevelsOpen, setIsLevelsOpen] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedOlympiadId, setSelectedOlympiadId] = useState<number | null>(null);
+  const [selectedOlympiadId, setSelectedOlympiadId] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [olympiadsResponse, participationsResponse] = await Promise.all([
-          axios.get('http://localhost:8000/olympiads'),
-          !localStorage.getItem('guest_mode') ? axios.get('http://localhost:8000/participations/me', {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          }) : Promise.resolve({ data: [] })
-        ]);
-
-        const olympiadsData = olympiadsResponse.data;
+        const response = await axios.get('http://localhost:8000/olympiads');
+        const olympiadsData = response.data;
         setOlympiads(olympiadsData);
         setFilteredOlympiads(olympiadsData);
-        setParticipatedOlympiads(participationsResponse.data || []);
 
         const allSubjects = olympiadsData.flatMap((o: Olympiad) => o.subjects);
         const unique = Array.from(new Set(allSubjects)).filter(s => s.trim() !== "");
@@ -47,6 +41,8 @@ const OlympiadsPage: React.FC = () => {
     };
     fetchData();
   }, []);
+
+
 
   useEffect(() => {
     let result = olympiads;
@@ -69,7 +65,7 @@ const OlympiadsPage: React.FC = () => {
     setFilteredOlympiads(result);
   }, [filters, searchUniversity, olympiads]);
 
-  const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
+    const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
 
   const toggleSubjectsDropdown = () => {
     setIsSubjectsOpen(!isSubjectsOpen);
@@ -84,44 +80,38 @@ const OlympiadsPage: React.FC = () => {
     });
   };
 
-  const handleParticipation = async (olympiadId: number) => {
-    if (participatedOlympiads.includes(olympiadId)) {
-      try {
-        await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        setParticipatedOlympiads(prev => prev.filter(id => id !== olympiadId));
-      } catch (err) {
-        console.error('Failed to delete participation:', err);
-      }
-    } else {
-      setSelectedOlympiadId(olympiadId);
-      setShowDateModal(true);
-    }
-  };
+const handleParticipation = async (olympiadId: number) => {
+  setSelectedOlympiadId(olympiadId);
+  setShowDateModal(true);
+};
 
-  const confirmParticipation = async () => {
-    if (!selectedDate || !selectedOlympiadId) return;
+const confirmParticipation = async () => {
+  if (!selectedDate || !selectedOlympiadId) return;
 
-    try {
-      await axios.post(
-        'http://localhost:8000/participations',
-        {
-          olympiad_id: selectedOlympiadId,
-          participation_date: selectedDate
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+  try {
+    const token = localStorage.getItem("token");
+    const userResponse = await axios.get("http://localhost:8000/users/me", {
+      headers: {Authorization: `Bearer ${token}`}
+    });
+    await axios.post(
+      'http://localhost:8000/participations',
+      {
+        olympiad_id: selectedOlympiadId,
+        participation_date: selectedDate,
+        user_id: userResponse.data.id
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      );
-      setParticipatedOlympiads(prev => [...prev, selectedOlympiadId]);
-      setShowDateModal(false);
-    } catch (err) {
-      console.error('Failed to update participation:', err);
-    }
-  };
+      }
+    );
+    setParticipatedOlympiads(prev => [...prev, selectedOlympiadId]);
+    setShowDateModal(false);
+  } catch (err) {
+    console.error('Failed to update participation:', err);
+  }
+};
 
   const getLevelLabel = (level: string) => {
     switch(level) {
@@ -158,178 +148,176 @@ const OlympiadsPage: React.FC = () => {
   }
 
   return (
-    <div className="olympiads-page">
-      <h1>Календарь олимпиад</h1>
+      <div className="olympiads-page">
+        <h1>Календарь олимпиад</h1>
 
-      <div className="filters-container">
-        <div className="filters-grid">
-          <div className="filter-group">
-            <label>Уровень</label>
-            <div className="custom-dropdown">
-              <button
-                className="dropdown-toggle"
-                onClick={() => setIsLevelsOpen(!isLevelsOpen)}
-              >
-                {filters.levels[0]
-                  ? getLevelLabel(filters.levels[0])
-                  : 'Все уровни'}
-              </button>
-              {isLevelsOpen && (
-                <div className="dropdown-menu">
-                  <div
-                    className="dropdown-item"
-                    onClick={() => handleLevelSelect('')}
-                  >
-                    Все уровни
-                  </div>
-                  {['1', '2', '3', '-'].map(level => (
-                    <div
-                      key={level}
-                      className="dropdown-item"
-                      onClick={() => handleLevelSelect(level)}
-                    >
-                      {getLevelLabel(level)}
+        <div className="filters-container">
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label>Уровень</label>
+              <div className="custom-dropdown">
+                <button
+                    className="dropdown-toggle"
+                    onClick={() => setIsLevelsOpen(!isLevelsOpen)}
+                >
+                  {filters.levels[0]
+                      ? getLevelLabel(filters.levels[0])
+                      : 'Все уровни'}
+                </button>
+                {isLevelsOpen && (
+                    <div className="dropdown-menu">
+                      <div
+                          className="dropdown-item"
+                          onClick={() => handleLevelSelect('')}
+                      >
+                        Все уровни
+                      </div>
+                      {['1', '2', '3', '-'].map(level => (
+                          <div
+                              key={level}
+                              className="dropdown-item"
+                              onClick={() => handleLevelSelect(level)}
+                          >
+                            {getLevelLabel(level)}
+                          </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <label>Предметы</label>
-            <div className="custom-dropdown">
-              <button
-                className="dropdown-toggle"
-                onClick={toggleSubjectsDropdown}
-              >
-                {filters.subjects.length > 0
-                  ? `Выбрано: ${filters.subjects.length}`
-                  : 'Нажмите, чтобы выбрать'}
-              </button>
-              {isSubjectsOpen && (
-                <div className="dropdown-menu">
-                  {uniqueSubjects.map(subject => (
-                    <label key={subject} className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={filters.subjects.includes(subject)}
-                        onChange={() => handleSubjectCheck(subject)}
-                      />
-                      <span className="checkmark"></span>
-                      {subject}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <label>Олимпиада</label>
-            <input
-              type="text"
-              className="filter-control"
-              placeholder="Введите название..."
-              value={searchUniversity}
-              onChange={(e) => setSearchUniversity(e.target.value)}
-            />
-          </div>
-
-          <button
-            className="reset-button"
-            onClick={() => {
-              setFilters({levels: [], subjects: [], universities: []});
-              setSearchUniversity('');
-            }}
-          >
-            Сбросить всё
-          </button>
-        </div>
-      </div>
-
-      {showDateModal && (
-        <div className="date-modal-overlay">
-          <div className="date-modal">
-            <h3 style={{ color: '#000' }}>Введите дату участия (например: 1234-56-78)</h3>
-            <input
-              type="text"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              placeholder="Формат: ГГГГ-ММ-ДД"
-              className="date-input"
-            />
-            <div className="modal-buttons">
-              <button
-                onClick={() => setShowDateModal(false)}
-                className="cancel-btn"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={confirmParticipation}
-                className="confirm-btn"
-              >
-                Подтвердить
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="olympiads-grid">
-        {filteredOlympiads.map(olympiad => (
-          <div key={olympiad.id} className="olympiad-card">
-            <div className="card-header">
-              <h3>{olympiad.title}</h3>
-              <span
-                className="level-badge"
-                style={{backgroundColor: getLevelColor(olympiad.level)}}
-              >
-                {getLevelLabel(olympiad.level)}
-              </span>
-            </div>
-
-            <div className="university">{olympiad.university}</div>
-
-            <div className="details">
-              <div className="detail">
-                <span>📅 Начало: {olympiad.start_date}</span>
-                <span>📅 Конец: {olympiad.end_date}</span>
-                <span>🕒 Длительность: {olympiad.duration}</span>
-                <span>📚 Предметы: {
-                  olympiad.subjects.length > 0
-                    ? olympiad.subjects.join(", ")
-                    : "Нет данных"
-                }</span>
+                )}
               </div>
             </div>
 
-            <div className="card-footer">
-              <a
-                href={olympiad.registration_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="register-btn"
-              >
-                Регистрация
-              </a>
-
-              {!localStorage.getItem('guest_mode') && (
+            <div className="filter-group">
+              <label>Предметы</label>
+              <div className="custom-dropdown">
                 <button
-                  onClick={() => handleParticipation(olympiad.id)}
-                  className={`participation-btn ${
-                    participatedOlympiads.includes(olympiad.id) ? 'participated' : ''
-                  }`}
+                    className="dropdown-toggle"
+                    onClick={toggleSubjectsDropdown}
                 >
-                  {participatedOlympiads.includes(olympiad.id) ? '✓ Участвовал' : 'Отметить участие'}
+                  {filters.subjects.length > 0
+                      ? `Выбрано: ${filters.subjects.length}`
+                      : 'Нажмите, чтобы выбрать'}
                 </button>
-              )}
+                {isSubjectsOpen && (
+                    <div className="dropdown-menu">
+                      {uniqueSubjects.map(subject => (
+                          <label key={subject} className="checkbox-item">
+                            <input
+                                type="checkbox"
+                                checked={filters.subjects.includes(subject)}
+                                onChange={() => handleSubjectCheck(subject)}
+                            />
+                            <span className="checkmark"></span>
+                            {subject}
+                          </label>
+                      ))}
+                    </div>
+                )}
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label>Олимпиада</label>
+              <input
+                  type="text"
+                  className="filter-control"
+                  placeholder="Введите название..."
+                  value={searchUniversity}
+                  onChange={(e) => setSearchUniversity(e.target.value)}
+              />
+            </div>
+
+            <button
+                className="reset-button"
+                onClick={() => {
+                  setFilters({levels: [], subjects: [], universities: []});
+                  setSearchUniversity('');
+                }}
+            >
+              Сбросить всё
+            </button>
+          </div>
+        </div>
+
+        {showDateModal && (
+          <div className="date-modal-overlay">
+            <div className="date-modal">
+              <h3 style={{ color: '#000' }}>Введите дату участия (например: 1234-56-78)</h3>
+              <input
+                type="text"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                placeholder="Формат: ГГГГ-ММ-ДД"
+                className="date-input"
+              />
+              <div className="modal-buttons">
+                <button
+                  onClick={() => setShowDateModal(false)}
+                  className="cancel-btn"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={confirmParticipation}
+                  className="confirm-btn"
+                >
+                  Подтвердить
+                </button>
+              </div>
             </div>
           </div>
-        ))}
+        )}
+
+        <div className="olympiads-grid">
+          {filteredOlympiads.map(olympiad => (
+              <div key={olympiad.id} className="olympiad-card">
+                <div className="card-header">
+                  <h3>{olympiad.title}</h3>
+                  <span
+                      className="level-badge"
+                      style={{backgroundColor: getLevelColor(olympiad.level)}}
+                  >
+                {getLevelLabel(olympiad.level)}
+              </span>
+                </div>
+
+                <div className="university">{olympiad.university}</div>
+
+                <div className="details">
+                  <div className="detail">
+                    <span>📅 Начало: {olympiad.start_date}</span>
+                    <span>📅 Конец: {olympiad.end_date}</span>
+                    <span>🕒 Длительность: {olympiad.duration}</span>
+                    <span>📚 Предметы: {
+                      olympiad.subjects.length > 0
+                          ? olympiad.subjects.join(", ")
+                          : "Нет данных"
+                    }</span>
+                  </div>
+                </div>
+
+                <div className="card-footer">
+                  <a
+                      href={olympiad.registration_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="register-btn"
+                  >
+                    Регистрация
+                  </a>
+
+                  <button
+                      onClick={() => handleParticipation(olympiad.id)}
+                      className={`participation-btn ${
+                          participatedOlympiads.includes(olympiad.id) ? 'participated' : ''
+                      }`}
+                  >
+                    {participatedOlympiads.includes(olympiad.id) ? '✓ Участвовал' : 'Отметить участие'}
+                  </button>
+                </div>
+              </div>
+          ))}
+        </div>
       </div>
-    </div>
   );
 };
 
