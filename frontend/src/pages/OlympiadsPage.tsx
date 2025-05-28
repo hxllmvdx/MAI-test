@@ -20,21 +20,26 @@ const OlympiadsPage: React.FC = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedOlympiadId, setSelectedOlympiadId] = useState<number | null>(null);
+  const [userDate, setUserDate] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [olympiadsResponse, participationsResponse] = await Promise.all([
+        const [olympiadsResponse, participationsResponse, profileResponse] = await Promise.all([
           axios.get('http://localhost:8000/olympiads'),
           !localStorage.getItem('guest_mode') ? axios.get('http://localhost:8000/participations/me', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          }) : Promise.resolve({ data: [] })
+          }) : Promise.resolve({ data: [] }),
+          !localStorage.getItem('guest_mode') ? axios.get('http://localhost:8000/profile', {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          }) : Promise.resolve({ data: { user_date: new Date().toISOString() } })
         ]);
 
         const olympiadsData = olympiadsResponse.data;
         setOlympiads(olympiadsData);
         setFilteredOlympiads(olympiadsData);
         setParticipatedOlympiads(participationsResponse.data || []);
+        setUserDate(new Date(profileResponse.data.user_date).toLocaleDateString('en-CA'));
 
         const allSubjects = olympiadsData.flatMap((o: Olympiad) => o.subjects);
         const unique = Array.from(new Set(allSubjects)).filter(s => s.trim() !== "");
@@ -47,6 +52,16 @@ const OlympiadsPage: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  const isOlympiadCompleted = (endDate: string): boolean => {
+    if (!userDate) return false;
+
+    const [day, month, year] = endDate.split('.');
+    const olympiadEndDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const userDateTime = new Date(userDate);
+
+    return olympiadEndDate < userDateTime;
+  };
 
   useEffect(() => {
     let result = olympiads;
@@ -279,7 +294,13 @@ const OlympiadsPage: React.FC = () => {
 
       <div className="olympiads-grid">
         {filteredOlympiads.map(olympiad => (
-          <div key={olympiad.id} className="olympiad-card">
+          <div
+            key={olympiad.id}
+            className="olympiad-card"
+            style={{
+              backgroundColor: isOlympiadCompleted(olympiad.end_date) ? '#ffebee' : 'white'
+            }}
+          >
             <div className="card-header">
               <h3>{olympiad.title}</h3>
               <span
