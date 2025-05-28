@@ -92,6 +92,17 @@
   margin: 0 0 20px 0;
 }
 
+.date-input {
+  padding: 10px;
+  border: 2px solid #8a2be2;
+  border-radius: 6px;
+  background: white;
+  color: #4B0082;
+  font-size: 1rem;
+  width: 200px;
+  margin-top: 10px;
+}
+
 .registration-button {
   width: 100%;
   padding: 12px;

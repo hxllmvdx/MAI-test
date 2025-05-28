@@ -57,7 +57,8 @@ const ProfilePage: React.FC = () => {
         setUniqueSubjects(subjects);
         setAvailableOlympiads(olympiadsRes.data);
 
-        const formattedDate = new Date(profileRes.data.user_date).toISOString().split('T')[0];
+        const rawDate = new Date(profileRes.data.user_date);
+        const formattedDate = rawDate.toLocaleDateString('en-CA');
         setUserDate(formattedDate);
 
       } catch (err) {
@@ -129,13 +130,13 @@ const ProfilePage: React.FC = () => {
         <div className="user-info-section">
           <p className="username-info">Имя пользователя: {username}</p>
           <div className="date-section">
-            <h3>Установка даты</h3>
+            <h3>Установка даты (гггг-мм-дд)</h3>
             <input
-                type="date"
+                type="text"
                 value={userDate}
                 onChange={(e) => setUserDate(e.target.value)}
+                placeholder="Введите дату в формате ГГГГ-ММ-ДД"
                 className="date-input"
-                placeholder="Введите дату (yyyy-mm-dd)"
             />
           </div>
         </div>

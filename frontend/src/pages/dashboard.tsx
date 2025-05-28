@@ -8,6 +8,8 @@ interface UserFilters {
   selected_olympiads: number[];
   selected_levels: string[];
   selected_subjects: string[];
+  n_days_notice: number | undefined;
+  user_date?: string;
 }
 
 export const Dashboard = () => {
@@ -15,7 +17,9 @@ export const Dashboard = () => {
   const [userFilters, setUserFilters] = useState<UserFilters>({
     selected_olympiads: [],
     selected_levels: [],
-    selected_subjects: []
+    selected_subjects: [],
+    n_days_notice: undefined,
+    user_date: undefined,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,7 +35,9 @@ export const Dashboard = () => {
         let filters: UserFilters = {
           selected_olympiads: [],
           selected_levels: [],
-          selected_subjects: []
+          selected_subjects: [],
+          n_days_notice: undefined,
+          user_date: undefined,
         };
 
         if (!isGuest) {
@@ -43,40 +49,46 @@ export const Dashboard = () => {
           filters = {
             selected_olympiads: userResponse.data.selected_olympiads,
             selected_levels: userResponse.data.selected_levels || [],
-            selected_subjects: userResponse.data.selected_subjects || []
+            selected_subjects: userResponse.data.selected_subjects || [],
+            n_days_notice: userResponse.data.n_days_notice,
+            user_date: userResponse.data.user_date,
           };
         }
 
-        const filtered = allOlympiads.filter(olympiad => {
-          if (filters.selected_olympiads.includes(olympiad.id)) return true;
+       const filtered = allOlympiads.filter(olympiad => {
+        let isSelected = false;
+        if (filters.selected_olympiads.includes(olympiad.id)) isSelected = true;
 
-          const hasActiveFilters =
-            filters.selected_levels.length > 0 ||
-            filters.selected_subjects.length > 0;
+        let daysCondition = true;
+        if (!isGuest && filters.n_days_notice !== undefined && filters.user_date) {
+          try {
+            const [d, m, y] = olympiad.start_date.split('.');
+            const olympiadDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+            olympiadDate.setHours(0, 0, 0, 0);
 
-          if (!hasActiveFilters) return false;
+            const userDate = new Date(filters.user_date);
+            userDate.setHours(0, 0, 0, 0);
 
-          const levelMatch =
-            filters.selected_levels.length === 0 ||
-            filters.selected_levels.some(l =>
-              l.trim().toLowerCase() === olympiad.level?.trim().toLowerCase()
-            );
+            const timeDiff = olympiadDate.getTime() - userDate.getTime();
+            daysCondition = Math.floor(timeDiff / 86400000) === filters.n_days_notice;
+          } catch (e) {
+            daysCondition = false;
+            console.error("Ошибка обработки дат:", e);
+          }
+        }
 
-          const normalizedSelectedSubjects = filters.selected_subjects
-            .map(subj => subj.trim().toLowerCase());
+        const levelMatch = filters.selected_levels.length === 0 ||
+          filters.selected_levels.some(l =>
+            l.trim().toLowerCase() === olympiad.level?.trim().toLowerCase()
+          );
 
-          const normalizedOlympiadSubjects = olympiad.subjects
-            ? olympiad.subjects.map(subj => subj.trim().toLowerCase())
-            : [];
+        const normalizedSubjects = filters.selected_subjects.map(s => s.trim().toLowerCase());
+        const olympiadSubjects = olympiad.subjects?.map(s => s.trim().toLowerCase()) || [];
+        const subjectMatch = filters.selected_subjects.length === 0 ||
+          normalizedSubjects.every(s => olympiadSubjects.includes(s));
 
-          const subjectMatch =
-            normalizedSelectedSubjects.length === 0 ||
-            normalizedSelectedSubjects.every(filterSubj =>
-              normalizedOlympiadSubjects.includes(filterSubj)
-            );
-
-          return levelMatch && subjectMatch;
-        });
+        return daysCondition && ((levelMatch && subjectMatch) || isSelected);
+      });
 
         setOlympiads(filtered);
         setUserFilters(filters);

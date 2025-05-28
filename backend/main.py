@@ -99,7 +99,6 @@ async def get_profile_data(
         .filter(models.User.id == current_user.id)
         .first()
     )
-    print(schemas.UserResponse.from_orm(user).user_date)
     return schemas.UserResponse.from_orm(user)
 
 
