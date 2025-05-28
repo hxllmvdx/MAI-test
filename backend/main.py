@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from . import crud, schemas, auth, models
 from .database import get_db
 from .models import User
+from .schemas import UserBase
 
 app = FastAPI()
 
@@ -29,7 +30,30 @@ async def register(user_data: schemas.UserCreate, db: Session = Depends(get_db))
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    return crud.user_crud.create(db=db, **user_data.dict())
+
+    try:
+        new_user = crud.user_crud.create(db=db, **user_data.dict())
+
+        db.commit()
+
+        db.refresh(new_user)
+
+        return schemas.UserResponse(
+            id=new_user.id,
+            username=new_user.username,
+            is_active=new_user.is_active,
+            n_days_notice=new_user.n_days_notice,
+            selected_olympiads=[],
+            selected_subjects=new_user.selected_subjects or [],
+            selected_levels=new_user.selected_levels or [],
+            user_date=new_user.user_date
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create user: {str(e)}"
+        )
 
 
 @app.post("/login")
@@ -130,24 +154,52 @@ def get_olympiad(olympiad_id: int, db: Session = Depends(get_db)):
     olympiad = crud.olympiad_crud.get(db, id=olympiad_id)
     if not olympiad:
         raise HTTPException(status_code=404, detail="Olympiad not found")
-    return olympiad
+
+    olympiad_data = {
+        "id": olympiad.id,
+        "title": olympiad.title,
+        "start_date": olympiad.start_date,
+        "end_date": olympiad.end_date,
+        "duration": olympiad.duration,
+        "level": olympiad.level,
+        "university": olympiad.university,
+        "registration_link": olympiad.registration_link,
+        "subjects": olympiad.parsed_subjects,
+        "status": olympiad.status
+    }
+
+    return olympiad_data
 
 
 # Comments endpoints
 @app.post("/olympiads/{olympiad_id}/comments", response_model=schemas.CommentResponse)
 async def create_comment(
-    olympiad_id: int,
-    comment: schemas.CommentCreate,
-    current_user: User = Depends(auth.get_current_user),
-    db: Session = Depends(get_db)
+        olympiad_id: int,
+        comment: schemas.CommentCreate,
+        current_user: User = Depends(auth.get_current_user),
+        db: Session = Depends(get_db)
 ):
-    return crud.comment_service.create_comment(
-        db=db,
-        user_id=current_user.id,
-        olympiad_id=olympiad_id,
-        text=comment.text
-    )
+    try:
+        new_comment = crud.comment_service.create_comment(
+            db=db,
+            user_id=current_user.id,
+            olympiad_id=olympiad_id,
+            text=comment.text
+        )
 
+        return schemas.CommentResponse(
+            id=new_comment.id,
+            text=new_comment.text,
+            created_at=new_comment.created_at,
+            user_id=new_comment.user_id,
+            olympiad_id=new_comment.olympiad_id,
+            author=schemas.UserBase(username=current_user.username)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create comment: {str(e)}"
+        )
 
 @app.get("/olympiads/{olympiad_id}/comments", response_model=List[schemas.CommentResponse])
 async def get_olympiad_comments(
@@ -160,16 +212,28 @@ async def get_olympiad_comments(
 # Participation endpoints
 @app.post("/participations", response_model=schemas.ParticipationResponse)
 async def create_participation(
-    participation: schemas.ParticipationBase,
-    current_user: User = Depends(auth.get_current_user),
-    db: Session = Depends(get_db)
+        participation: schemas.ParticipationBase,
+        current_user: User = Depends(auth.get_current_user),
+        db: Session = Depends(get_db)
 ):
-    return crud.participation_service.create_participation(
-        db=db,
-        user_id=current_user.id,
-        olympiad_id=participation.olympiad_id,
-        participation_date=participation.participation_date
-    )
+    try:
+        new_participation = crud.participation_service.create_participation(
+            db=db,
+            user_id=current_user.id,
+            olympiad_id=participation.olympiad_id,
+            participation_date=participation.participation_date
+        )
+
+        db.commit()
+        db.refresh(new_participation)
+
+        return new_participation
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create participation: {str(e)}"
+        )
 
 
 @app.delete("/participations/{olympiad_id}")

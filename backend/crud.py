@@ -17,17 +17,15 @@ class BaseCRUD:
         self.model = model
 
     def create(self, db: Session, **data: Any) -> Optional[ModelType]:
-        """Создание нового объекта в базе данных."""
-
         try:
             if self.model == User and "password" in data:
                 data["password"] = get_password_hash(data.pop("password"))
-            if "subjects" in data and isinstance(data["subjects"], list):
+
+            if self.model in (Olympiad, User) and "subjects" in data and isinstance(data["subjects"], list):
                 data["subjects"] = json.dumps(data["subjects"], ensure_ascii=False)
+
             obj = self.model(**data)
             db.add(obj)
-            db.commit()
-            db.refresh(obj)
             return obj
         except exc.SQLAlchemyError as e:
             db.rollback()
@@ -222,13 +220,19 @@ class CommentService:
             olympiad_id: int,
             text: str
     ) -> Comment:
-        """Создание нового комментария."""
-        return self.crud.create(
-            db,
-            text=text,
-            user_id=user_id,
-            olympiad_id=olympiad_id
-        )
+        try:
+            comment = self.crud.create(
+                db,
+                text=text,
+                user_id=user_id,
+                olympiad_id=olympiad_id
+            )
+
+            db.commit()
+            db.refresh(comment)
+            return comment
+        except Exception as e:
+            db.rollback()
 
     def get_comments_for_olympiad(
             self,

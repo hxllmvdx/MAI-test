@@ -102,23 +102,25 @@ const OlympiadsPage: React.FC = () => {
     });
   };
 
-  const handleParticipation = async (olympiadId: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click event
+const handleParticipation = async (olympiadId: number, e: React.MouseEvent) => {
+  e.stopPropagation();
 
-    if (participatedOlympiads.includes(olympiadId)) {
-      try {
-        await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        setParticipatedOlympiads(prev => prev.filter(id => id !== olympiadId));
-      } catch (err) {
-        console.error('Failed to delete participation:', err);
-      }
-    } else {
-      setSelectedOlympiadId(olympiadId);
-      setShowDateModal(true);
+  if (participatedOlympiads.includes(olympiadId)) {
+    try {
+      await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setParticipatedOlympiads(prev => prev.filter(id => id !== olympiadId));
+    } catch (err) {
+      console.error('Failed to delete participation:', err);
     }
-  };
+  } else {
+    setSelectedOlympiadId(olympiadId);
+    setSelectedDate("");
+    setShowDateModal(true);
+  }
+};
+
 
   const confirmParticipation = async () => {
     if (!selectedDate || !selectedOlympiadId) return;
@@ -276,12 +278,12 @@ const OlympiadsPage: React.FC = () => {
       {showDateModal && (
         <div className="date-modal-overlay">
           <div className="date-modal">
-            <h3 style={{ color: '#000' }}>Введите дату участия (например: 1234-56-78)</h3>
+            <h3 style={{ color: '#000' }}>Введите дату участия в формате ГГГГ-ММ-ДД</h3>
             <input
               type="text"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              placeholder="Формат: ГГГГ-ММ-ДД"
+              placeholder="Например: 2023-12-31"
               className="date-input"
             />
             <div className="modal-buttons">

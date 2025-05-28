@@ -93,6 +93,7 @@ class CommentResponse(CommentBase):
     user_id: int
     olympiad_id: int
     created_at: datetime
+    author: Optional[UserBase] = None
 
     class Config:
         from_attributes = True
