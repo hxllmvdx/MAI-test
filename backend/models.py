@@ -85,7 +85,7 @@ class Comment(Base):
     text: Mapped[str] = mapped_column(String(2048))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"))
 
     author: Mapped["User"] = relationship(back_populates="comments")

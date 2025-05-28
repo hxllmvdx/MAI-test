@@ -125,6 +125,14 @@ async def get_olympiads(
     ]
 
 
+@app.get("/olympiads/{olympiad_id}", response_model=schemas.OlympiadResponse)
+def get_olympiad(olympiad_id: int, db: Session = Depends(get_db)):
+    olympiad = crud.olympiad_crud.get(db, id=olympiad_id)
+    if not olympiad:
+        raise HTTPException(status_code=404, detail="Olympiad not found")
+    return olympiad
+
+
 # Comments endpoints
 @app.post("/olympiads/{olympiad_id}/comments", response_model=schemas.CommentResponse)
 async def create_comment(

@@ -90,7 +90,7 @@ class CommentCreate(CommentBase):
 
 class CommentResponse(CommentBase):
     id: int
-    author_id: int
+    user_id: int
     olympiad_id: int
     created_at: datetime
 

@@ -26,8 +26,16 @@ export interface ParticipationHistory {
   result?: string;
 }
 
+export interface Comment {
+  id: number;
+  text: string;
+  created_at: string;
+  author_id: number;
+  author_name?: string;
+}
+
 export interface FilterSettings {
-  levels?: string[];
-  subjects?: string[];
-  universities?: string[];
+  levels: string[];
+  subjects: string[];
+  universities: string[];
 }

@@ -226,7 +226,7 @@ class CommentService:
         return self.crud.create(
             db,
             text=text,
-            author_id=user_id,
+            user_id=user_id,
             olympiad_id=olympiad_id
         )
 

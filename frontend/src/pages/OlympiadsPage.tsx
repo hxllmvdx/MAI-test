@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Olympiad, FilterSettings } from "../types/olympiad";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 import './OlympiadsPage.css';
+import { Olympiad, FilterSettings } from "../types/olympiad.ts";
 
 const OlympiadsPage: React.FC = () => {
   const [olympiads, setOlympiads] = useState<Olympiad[]>([]);
@@ -21,6 +23,7 @@ const OlympiadsPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedOlympiadId, setSelectedOlympiadId] = useState<number | null>(null);
   const [userDate, setUserDate] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +102,9 @@ const OlympiadsPage: React.FC = () => {
     });
   };
 
-  const handleParticipation = async (olympiadId: number) => {
+  const handleParticipation = async (olympiadId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event
+
     if (participatedOlympiads.includes(olympiadId)) {
       try {
         await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
@@ -136,6 +141,11 @@ const OlympiadsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to update participation:', err);
     }
+  };
+
+  const handleViewOlympiad = (olympiadId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/olympiads/${olympiadId}`);
   };
 
   const getLevelLabel = (level: string) => {
@@ -332,13 +342,21 @@ const OlympiadsPage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="register-btn"
+                onClick={(e) => e.stopPropagation()}
               >
-                Регистрация
+                Регистрация <ExternalLink size={14} />
               </a>
+
+              <button
+                onClick={(e) => handleViewOlympiad(olympiad.id, e)}
+                className="view-olympiad-btn"
+              >
+                Перейти к олимпиаде
+              </button>
 
               {!localStorage.getItem('guest_mode') && (
                 <button
-                  onClick={() => handleParticipation(olympiad.id)}
+                  onClick={(e) => handleParticipation(olympiad.id, e)}
                   className={`participation-btn ${
                     participatedOlympiads.includes(olympiad.id) ? 'participated' : ''
                   }`}
