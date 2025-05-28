@@ -13,6 +13,7 @@ const ProfilePage: React.FC = () => {
     subjects: [],
     levels: []
   });
+  const [userDate, setUserDate] = useState('');
   const [participationHistory, setParticipationHistory] = useState<ParticipationHistory[]>([]);
   const [availableOlympiads, setAvailableOlympiads] = useState<Olympiad[]>([]);
   const [uniqueSubjects, setUniqueSubjects] = useState<string[]>([]);
@@ -56,6 +57,9 @@ const ProfilePage: React.FC = () => {
         setUniqueSubjects(subjects);
         setAvailableOlympiads(olympiadsRes.data);
 
+        const formattedDate = new Date(profileRes.data.user_date).toISOString().split('T')[0];
+        setUserDate(formattedDate);
+
       } catch (err) {
         setError('Ошибка загрузки данных профиля');
         console.error(err);
@@ -90,6 +94,7 @@ const ProfilePage: React.FC = () => {
     try {
       await axios.put('http://localhost:8000/profile', {
         n_days_notice: nDaysNotice,
+        user_date: userDate,
         selected_olympiads: notificationFilters.olympiads,
         selected_subjects: notificationFilters.subjects,
         selected_levels: notificationFilters.levels
@@ -123,6 +128,16 @@ const ProfilePage: React.FC = () => {
 
         <div className="user-info-section">
           <p className="username-info">Имя пользователя: {username}</p>
+          <div className="date-section">
+            <h3>Установка даты</h3>
+            <input
+                type="date"
+                value={userDate}
+                onChange={(e) => setUserDate(e.target.value)}
+                className="date-input"
+                placeholder="Введите дату (yyyy-mm-dd)"
+            />
+          </div>
         </div>
 
         <section className="notification-settings">

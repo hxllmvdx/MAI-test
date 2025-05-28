@@ -19,6 +19,7 @@ class UserUpdate(BaseModel):
     selected_olympiads: Optional[List[int]] = None
     selected_subjects: Optional[List[str]] = None
     selected_levels: Optional[List[str]] = None
+    user_date: Optional[datetime] = None
 
 
 class UserResponse(UserBase):
@@ -28,6 +29,7 @@ class UserResponse(UserBase):
     selected_olympiads: List[int] = []
     selected_subjects: List[str] = []
     selected_levels: List[str] = []
+    user_date: datetime
 
     @classmethod
     def from_orm(cls, user: models.User):
@@ -38,7 +40,8 @@ class UserResponse(UserBase):
             n_days_notice=user.n_days_notice,
             selected_olympiads=[ol.id for ol in user.selected_olympiads],
             selected_subjects=user.selected_subjects,
-            selected_levels=user.selected_levels
+            selected_levels=user.selected_levels,
+            user_date=user.user_date
         )
 
 

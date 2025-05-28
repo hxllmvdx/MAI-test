@@ -99,6 +99,7 @@ async def get_profile_data(
         .filter(models.User.id == current_user.id)
         .first()
     )
+    print(schemas.UserResponse.from_orm(user).user_date)
     return schemas.UserResponse.from_orm(user)
 
 
@@ -180,15 +181,3 @@ async def delete_participation(
             detail="Participation not found"
         )
     return {"status": "success"}
-
-
-# Notifications endpoints
-@app.get("/notifications", response_model=List[schemas.NotificationResponse])
-async def get_notifications(
-    current_user: User = Depends(auth.get_current_user),
-    db: Session = Depends(get_db)
-):
-    return crud.notification_service.get_unread_notifications(
-        db=db,
-        user_id=current_user.id
-    )

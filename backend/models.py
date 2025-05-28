@@ -21,6 +21,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(1024))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     n_days_notice: Mapped[int] = mapped_column(Integer, default=7)
+    user_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     participations: Mapped[list["Participation"]] = relationship(back_populates="user")
     comments: Mapped[list["Comment"]] = relationship(back_populates="author")
