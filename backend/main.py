@@ -159,7 +159,8 @@ async def create_participation(
     return crud.participation_service.create_participation(
         db=db,
         user_id=current_user.id,
-        olympiad_id=participation.olympiad_id
+        olympiad_id=participation.olympiad_id,
+        participation_date=participation.participation_date
     )
 
 

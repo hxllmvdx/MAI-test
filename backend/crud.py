@@ -140,16 +140,17 @@ class ParticipationService:
         self.crud = participation_crud
 
     def create_participation(
-            self,
-            db: Session,
-            user_id: int,
-            olympiad_id: int
+        self,
+        db: Session,
+        user_id: int,
+        olympiad_id: int,
+        participation_date: str
     ) -> Participation:
-        """Создание записи об участии пользователя в олимпиаде."""
         return self.crud.create(
             db,
             user_id=user_id,
-            olympiad_id=olympiad_id
+            olympiad_id=olympiad_id,
+            participation_date=participation_date
         )
 
     def delete_participation(

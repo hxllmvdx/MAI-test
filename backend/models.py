@@ -93,11 +93,11 @@ class Comment(Base):
 
 
 class Participation(Base):
-    __tablename__ = "participations"
+    __tablename__ = 'participations'
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    olympiad_id: Mapped[int] = mapped_column(ForeignKey("olympiads.id"), primary_key=True)
-    participation_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True)
+    olympiad_id: Mapped[int] = mapped_column(ForeignKey('olympiads.id'), primary_key=True)
+    participation_date: Mapped[str] = mapped_column(None)
 
     user: Mapped["User"] = relationship(back_populates="participations")
     olympiad: Mapped["Olympiad"] = relationship(back_populates="participations")

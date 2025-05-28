@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Olympiad, FilterSettings } from "../types/olympiad";
 import './OlympiadsPage.css';
+import {userInfo} from "node:os";
 
 const OlympiadsPage: React.FC = () => {
   const [olympiads, setOlympiads] = useState<Olympiad[]>([]);
@@ -17,6 +18,9 @@ const OlympiadsPage: React.FC = () => {
   const [uniqueSubjects, setUniqueSubjects] = useState<string[]>([]);
   const [searchUniversity, setSearchUniversity] = useState("");
   const [isLevelsOpen, setIsLevelsOpen] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedOlympiadId, setSelectedOlympiadId] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,30 +80,38 @@ const OlympiadsPage: React.FC = () => {
     });
   };
 
-  const handleParticipation = async (olympiadId: number) => {
-    try {
-      if (participatedOlympiads.includes(olympiadId)) {
-        await axios.delete(`http://localhost:8000/participations/${olympiadId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setParticipatedOlympiads(prev => prev.filter(id => id !== olympiadId));
-      } else {
-        await axios.post('http://localhost:8000/participations',
-          { olympiad_id: olympiadId },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
-        setParticipatedOlympiads(prev => [...prev, olympiadId]);
+const handleParticipation = async (olympiadId: number) => {
+  setSelectedOlympiadId(olympiadId);
+  setShowDateModal(true);
+};
+
+const confirmParticipation = async () => {
+  if (!selectedDate || !selectedOlympiadId) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    const userResponse = await axios.get("http://localhost:8000/users/me", {
+      headers: {Authorization: `Bearer ${token}`}
+    });
+    await axios.post(
+      'http://localhost:8000/participations',
+      {
+        olympiad_id: selectedOlympiadId,
+        participation_date: selectedDate,
+        user_id: userResponse.data.id
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    } catch (err) {
-      console.error('Failed to update participation:', err);
-    }
-  };
+    );
+    setParticipatedOlympiads(prev => [...prev, selectedOlympiadId]);
+    setShowDateModal(false);
+  } catch (err) {
+    console.error('Failed to update participation:', err);
+  }
+};
 
   const getLevelLabel = (level: string) => {
     switch(level) {
@@ -226,6 +238,34 @@ const OlympiadsPage: React.FC = () => {
           </div>
         </div>
 
+        {showDateModal && (
+          <div className="date-modal-overlay">
+            <div className="date-modal">
+              <h3 style={{ color: '#000' }}>Введите дату участия (например: 1234-56-78)</h3>
+              <input
+                type="text"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                placeholder="Формат: ГГГГ-ММ-ДД"
+                className="date-input"
+              />
+              <div className="modal-buttons">
+                <button
+                  onClick={() => setShowDateModal(false)}
+                  className="cancel-btn"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={confirmParticipation}
+                  className="confirm-btn"
+                >
+                  Подтвердить
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="olympiads-grid">
           {filteredOlympiads.map(olympiad => (

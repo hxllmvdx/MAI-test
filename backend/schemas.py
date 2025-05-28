@@ -100,6 +100,7 @@ class CommentResponse(CommentBase):
 
 class ParticipationBase(BaseModel):
     olympiad_id: int
+    participation_date: str
 
 
 class ParticipationResponse(ParticipationBase):
