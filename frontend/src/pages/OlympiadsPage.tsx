@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
 import './OlympiadsPage.css';
 import { Olympiad, FilterSettings } from "../types/olympiad.ts";
+import { ArrowLeft } from "lucide-react";
 
 const OlympiadsPage: React.FC = () => {
   const [olympiads, setOlympiads] = useState<Olympiad[]>([]);
@@ -185,192 +186,203 @@ const handleParticipation = async (olympiadId: number, e: React.MouseEvent) => {
   }
 
   return (
-    <div className="olympiads-page">
-      <h1>Календарь олимпиад</h1>
-
-      <div className="filters-container">
-        <div className="filters-grid">
-          <div className="filter-group">
-            <label>Уровень</label>
-            <div className="custom-dropdown">
-              <button
-                className="dropdown-toggle"
-                onClick={() => setIsLevelsOpen(!isLevelsOpen)}
-              >
-                {filters.levels[0]
-                  ? getLevelLabel(filters.levels[0])
-                  : 'Все уровни'}
-              </button>
-              {isLevelsOpen && (
-                <div className="dropdown-menu">
-                  <div
-                    className="dropdown-item"
-                    onClick={() => handleLevelSelect('')}
-                  >
-                    Все уровни
-                  </div>
-                  {['1', '2', '3', '-'].map(level => (
-                    <div
-                      key={level}
-                      className="dropdown-item"
-                      onClick={() => handleLevelSelect(level)}
-                    >
-                      {getLevelLabel(level)}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <label>Предметы</label>
-            <div className="custom-dropdown">
-              <button
-                className="dropdown-toggle"
-                onClick={toggleSubjectsDropdown}
-              >
-                {filters.subjects.length > 0
-                  ? `Выбрано: ${filters.subjects.length}`
-                  : 'Нажмите, чтобы выбрать'}
-              </button>
-              {isSubjectsOpen && (
-                <div className="dropdown-menu">
-                  {uniqueSubjects.map(subject => (
-                    <label key={subject} className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={filters.subjects.includes(subject)}
-                        onChange={() => handleSubjectCheck(subject)}
-                      />
-                      <span className="checkmark"></span>
-                      {subject}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <label>Олимпиада</label>
-            <input
-              type="text"
-              className="filter-control"
-              placeholder="Введите название..."
-              value={searchUniversity}
-              onChange={(e) => setSearchUniversity(e.target.value)}
-            />
-          </div>
-
+      <div className="olympiads-page">
+        <div className="navigation-header">
           <button
-            className="reset-button"
-            onClick={() => {
-              setFilters({levels: [], subjects: [], universities: []});
-              setSearchUniversity('');
-            }}
+              className="back-button"
+              onClick={() => navigate('/dashboard')}
           >
-            Сбросить всё
+            <ArrowLeft size={20}/>
+            Назад в личный кабинет
           </button>
         </div>
-      </div>
+        <div className="olympiads-content">
+        <h1 className="dashboard-title">Календарь олимпиад</h1>
 
-      {showDateModal && (
-        <div className="date-modal-overlay">
-          <div className="date-modal">
-            <h3 style={{ color: '#000' }}>Введите дату участия в формате ГГГГ-ММ-ДД</h3>
-            <input
-              type="text"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              placeholder="Например: 2023-12-31"
-              className="date-input"
-            />
-            <div className="modal-buttons">
-              <button
-                onClick={() => setShowDateModal(false)}
-                className="cancel-btn"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={confirmParticipation}
-                className="confirm-btn"
-              >
-                Подтвердить
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="olympiads-grid">
-        {filteredOlympiads.map(olympiad => (
-          <div
-            key={olympiad.id}
-            className="olympiad-card"
-            style={{
-              backgroundColor: isOlympiadCompleted(olympiad.end_date) ? '#ffebee' : 'white'
-            }}
-          >
-            <div className="card-header">
-              <h3>{olympiad.title}</h3>
-              <span
-                className="level-badge"
-                style={{backgroundColor: getLevelColor(olympiad.level)}}
-              >
-                {getLevelLabel(olympiad.level)}
-              </span>
-            </div>
-
-            <div className="university">{olympiad.university}</div>
-
-            <div className="details">
-              <div className="detail">
-                <span>📅 Начало: {olympiad.start_date}</span>
-                <span>📅 Конец: {olympiad.end_date}</span>
-                <span>🕒 Длительность: {olympiad.duration}</span>
-                <span>📚 Предметы: {
-                  olympiad.subjects.length > 0
-                    ? olympiad.subjects.join(", ")
-                    : "Нет данных"
-                }</span>
+        <div className="filters-container">
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label>Уровень</label>
+              <div className="custom-dropdown">
+                <button
+                    className="dropdown-toggle"
+                    onClick={() => setIsLevelsOpen(!isLevelsOpen)}
+                >
+                  {filters.levels[0]
+                      ? getLevelLabel(filters.levels[0])
+                      : 'Все уровни'}
+                </button>
+                {isLevelsOpen && (
+                    <div className="dropdown-menu">
+                      <div
+                          className="dropdown-item"
+                          onClick={() => handleLevelSelect('')}
+                      >
+                        Все уровни
+                      </div>
+                      {['1', '2', '3', '-'].map(level => (
+                          <div
+                              key={level}
+                              className="dropdown-item"
+                              onClick={() => handleLevelSelect(level)}
+                          >
+                            {getLevelLabel(level)}
+                          </div>
+                      ))}
+                    </div>
+                )}
               </div>
             </div>
 
-            <div className="card-footer">
-              <a
-                href={olympiad.registration_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="register-btn"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Регистрация <ExternalLink size={14} />
-              </a>
-
-              <button
-                onClick={(e) => handleViewOlympiad(olympiad.id, e)}
-                className="view-olympiad-btn"
-              >
-                Перейти к олимпиаде
-              </button>
-
-              {!localStorage.getItem('guest_mode') && (
+            <div className="filter-group">
+              <label>Предметы</label>
+              <div className="custom-dropdown">
                 <button
-                  onClick={(e) => handleParticipation(olympiad.id, e)}
-                  className={`participation-btn ${
-                    participatedOlympiads.includes(olympiad.id) ? 'participated' : ''
-                  }`}
+                    className="dropdown-toggle"
+                    onClick={toggleSubjectsDropdown}
                 >
-                  {participatedOlympiads.includes(olympiad.id) ? '✓ Участвовал' : 'Отметить участие'}
+                  {filters.subjects.length > 0
+                      ? `Выбрано: ${filters.subjects.length}`
+                      : 'Нажмите, чтобы выбрать'}
                 </button>
-              )}
+                {isSubjectsOpen && (
+                    <div className="dropdown-menu">
+                      {uniqueSubjects.map(subject => (
+                          <label key={subject} className="checkbox-item">
+                            <input
+                                type="checkbox"
+                                checked={filters.subjects.includes(subject)}
+                                onChange={() => handleSubjectCheck(subject)}
+                            />
+                            <span className="checkmark"></span>
+                            {subject}
+                          </label>
+                      ))}
+                    </div>
+                )}
+              </div>
             </div>
+
+            <div className="filter-group">
+              <label>Олимпиада</label>
+              <input
+                  type="text"
+                  className="filter-control"
+                  placeholder="Введите название..."
+                  value={searchUniversity}
+                  onChange={(e) => setSearchUniversity(e.target.value)}
+              />
+            </div>
+
+            <button
+                className="reset-button"
+                onClick={() => {
+                  setFilters({levels: [], subjects: [], universities: []});
+                  setSearchUniversity('');
+                }}
+            >
+              Сбросить всё
+            </button>
           </div>
-        ))}
+        </div>
+
+        {showDateModal && (
+            <div className="date-modal-overlay">
+              <div className="date-modal">
+                <h3 style={{color: '#000'}}>Введите дату участия в формате ГГГГ-ММ-ДД</h3>
+                <input
+                    type="text"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    placeholder="Например: 2023-12-31"
+                    className="date-input"
+                />
+                <div className="modal-buttons">
+                  <button
+                      onClick={() => setShowDateModal(false)}
+                      className="cancel-btn"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                      onClick={confirmParticipation}
+                      className="confirm-btn"
+                  >
+                    Подтвердить
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+
+        <div className="olympiads-grid">
+          {filteredOlympiads.map(olympiad => (
+              <div
+                  key={olympiad.id}
+                  className="olympiad-card"
+                  style={{
+                    backgroundColor: isOlympiadCompleted(olympiad.end_date) ? '#ffebee' : 'white'
+                  }}
+              >
+                <div className="card-header">
+                  <h3>{olympiad.title}</h3>
+                  <span
+                      className="level-badge"
+                      style={{backgroundColor: getLevelColor(olympiad.level)}}
+                  >
+                {getLevelLabel(olympiad.level)}
+              </span>
+                </div>
+
+                <div className="university">{olympiad.university}</div>
+
+                <div className="details">
+                  <div className="detail">
+                    <span>📅 Начало: {olympiad.start_date}</span>
+                    <span>📅 Конец: {olympiad.end_date}</span>
+                    <span>🕒 Длительность: {olympiad.duration}</span>
+                    <span>📚 Предметы: {
+                      olympiad.subjects.length > 0
+                          ? olympiad.subjects.join(", ")
+                          : "Нет данных"
+                    }</span>
+                  </div>
+                </div>
+
+                <div className="card-footer">
+                  <a
+                      href={olympiad.registration_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="register-btn"
+                      onClick={(e) => e.stopPropagation()}
+                  >
+                    Регистрация <ExternalLink size={14}/>
+                  </a>
+
+                  <button
+                      onClick={(e) => handleViewOlympiad(olympiad.id, e)}
+                      className="view-olympiad-btn"
+                  >
+                    Перейти к олимпиаде
+                  </button>
+
+                  {!localStorage.getItem('guest_mode') && (
+                      <button
+                          onClick={(e) => handleParticipation(olympiad.id, e)}
+                          className={`participation-btn ${
+                              participatedOlympiads.includes(olympiad.id) ? 'participated' : ''
+                          }`}
+                      >
+                        {participatedOlympiads.includes(olympiad.id) ? '✓ Участвовал' : 'Отметить участие'}
+                      </button>
+                  )}
+                </div>
+              </div>
+          ))}
+        </div>
       </div>
-    </div>
+      </div>
   );
 };
 

@@ -134,20 +134,6 @@
   gap: 1.5rem;
 }
 
-.olympiad-card {
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.olympiad-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-}
-
 .card-header {
   padding: 1.25rem;
   display: flex;
@@ -323,4 +309,65 @@
   .reset-button {
     width: 100%;
   }
+}
+
+
+.dashboard-style {
+  background: linear-gradient(135deg, #6a5af9 0%, #9f7aea 100%);
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.olympiads-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+
+.olympiad-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.olympiad-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+.register-btn, .participation-btn {
+  border-radius: 30px !important;
+  padding: 0.75rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.register-btn:hover, .participation-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2) !important;
 }
