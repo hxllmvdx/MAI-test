@@ -181,3 +181,14 @@ async def delete_participation(
             detail="Participation not found"
         )
     return {"status": "success"}
+
+
+@app.get("/participations/me", response_model=List[int])
+async def get_user_participations(
+    current_user: User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    participations = db.query(models.Participation.olympiad_id).filter(
+        models.Participation.user_id == current_user.id
+    ).all()
+    return [p[0] for p in participations]
