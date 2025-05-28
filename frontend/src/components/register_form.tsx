@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import './register_form.css';
 
 export const RegisterForm = () => {
   const [username, setUsername] = useState("");
@@ -33,7 +32,7 @@ export const RegisterForm = () => {
   };
 
   return (
-    <form className="register-form" onSubmit={handleSubmit}>
+    <form className="form-class" onSubmit={handleSubmit}>
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">Registration successful! Redirecting to login...</p>}
       <div className="form-group">

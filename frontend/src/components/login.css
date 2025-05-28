@@ -1,0 +1,237 @@
+/* login-page.css */
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M44.4,-58.3C56.5,-51.3,64.3,-35.6,67.4,-18.9C70.5,-2.2,69,15.5,63.4,32.4C57.8,49.3,48.2,65.4,34.4,72.2C20.6,79.1,2.6,76.7,-12.4,70.7C-27.4,64.7,-39.4,55.1,-50.2,44C-61,32.8,-70.5,20.1,-73.1,5.4C-75.7,-9.4,-71.4,-26.2,-62.5,-39.7C-53.7,-53.2,-40.3,-63.4,-25.7,-69.3C-11.1,-75.3,4.8,-77.1,21.1,-74.3C37.4,-71.6,53.9,-64.3,44.4,-58.3Z" fill="%23ffffff10" /></svg>');
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.login-page h1 {
+  font-size: 2.5rem;
+  color: white;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-links {
+  margin-top: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-links p {
+  color: rgba(255,255,255,0.9);
+  margin: 0.5rem 0;
+}
+
+.auth-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.auth-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #fff;
+  transition: width 0.3s ease;
+}
+
+.auth-links a:hover::after {
+  width: 100%;
+}
+
+.guest-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.guest-section p {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 1rem;
+}
+
+.guest-button {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.guest-button:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .login-page {
+    padding: 1.5rem;
+  }
+  
+  .login-page h1 {
+    font-size: 2rem;
+  }
+  
+  .guest-button {
+    width: 100%;
+    padding: 0.8rem;
+  }
+}
+
+/* Анимация загрузки */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-page > * {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* register-page.css */
+.register-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M44.4,-58.3C56.5,-51.3,64.3,-35.6,67.4,-18.9C70.5,-2.2,69,15.5,63.4,32.4C57.8,49.3,48.2,65.4,34.4,72.2C20.6,79.1,2.6,76.7,-12.4,70.7C-27.4,64.7,-39.4,55.1,-50.2,44C-61,32.8,-70.5,20.1,-73.1,5.4C-75.7,-9.4,-71.4,-26.2,-62.5,-39.7C-53.7,-53.2,-40.3,-63.4,-25.7,-69.3C-11.1,-75.3,4.8,-77.1,21.1,-74.3C37.4,-71.6,53.9,-64.3,44.4,-58.3Z" fill="%23ffffff10" /></svg>');
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.register-page h1 {
+  font-size: 2.5rem;
+  color: white;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.register-form {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-links {
+  margin-top: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-links p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.5rem 0;
+}
+
+.auth-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.auth-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #fff;
+  transition: width 0.3s ease;
+}
+
+.auth-links a:hover::after {
+  width: 100%;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .register-page {
+    padding: 1.5rem;
+  }
+  
+  .register-page h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Анимация загрузки */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.register-page > * {
+  animation: fadeIn 0.6s ease-out forwards;
+}

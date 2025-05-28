@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthRoute } from "./components/auth_route";
-import { Login } from "./pages/login";
-import { Register } from "./pages/register";
+import { Login } from "./components/login";
+import { Register } from "./components/register";
 import { Dashboard } from "./pages/dashboard";
 import OlympiadsPage from "./pages/OlympiadsPage";
 import ProfilePage from "./pages/ProfilePage";
