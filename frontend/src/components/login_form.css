@@ -1,113 +1,86 @@
-body{
-    background-color: #000000;
-    
-}
-
-
+/* Основные стили для формы логина */
 .login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 100%;
-}
-
-.login-form .form-group {
+  max-width: 400px;
+  margin: 0 auto;
+  backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  align-items: center; /* Центрируем содержимое по горизонтали */
 }
 
-.login-form .form-label {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.login-form .form-input {
-  padding: 1rem 1.2rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
-}
-
-.login-form .form-input:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-}
-
-.login-form .form-button {
-  padding: 1rem;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 1.05rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.login-form .form-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-.login-form .form-button:active {
-  transform: translateY(0);
-}
-
-.login-form .error-message {
-  padding: 0.9rem;
-  border-radius: 8px;
-  background: rgba(255, 71, 87, 0.2);
-  color: #ffcccb;
-  border: 1px solid rgba(255, 71, 87, 0.3);
+/* Стили заголовков и сообщений об ошибках */
+.error-message {
+  color: #ff4d4d;
   font-size: 0.9rem;
-  text-align: center;
-  animation: slideDown 0.4s ease-out forwards;
+  margin-bottom: 15px;
 }
 
-.login-form .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-  font-style: italic;
+/* Стили для групп полей ввода */
+.form-group {
+  margin-bottom: 20px;
+  width: 100%; /* Задаем ширину 100% для полей ввода */
 }
 
-
-h1{
-    margin-left: 500px;
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #fff;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
-.guest-button {
-  margin-top: 20px;
-  padding: 10px 15px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.form-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+  outline: none;
+}
+
+/* Стили для кнопки */
+.form-button {
+  background: linear-gradient(90deg, #4a90e2, #9013fe);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  width: 100%; /* Задаем ширину кнопки 100% */
+  max-width: 200px; /* Ограничиваем максимальную ширину кнопки */
+  margin-top: 10px; /* Добавляем отступ сверху */
 }
 
-.guest-button:hover {
-  background: #e0e0e0;
+.form-button:hover {
+  background: linear-gradient(90deg, #9013fe, #4a90e2);
+  transform: scale(1.05);
 }
 
+.form-button:focus {
+  outline: none;
+}
+
+/* Адаптивность */
+@media (max-width: 500px) {
+  .login-form {
+    padding: 20px;
+  }
+
+  .form-button {
+    width: 100%;
+  }
+}
