@@ -10,9 +10,10 @@ from sqlalchemy.orm import Session
 from . import crud
 from .database import get_db
 from .models import User
+from config import Config, absolute_path_dotenv
 
-
-SECRET_KEY = "" #добавить ключ
+config = Config(_env_file=absolute_path_dotenv)
+SECRET_KEY = config.secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

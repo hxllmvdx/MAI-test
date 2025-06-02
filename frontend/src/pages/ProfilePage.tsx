@@ -141,133 +141,142 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="profile-page">
-      <h1>Ваш профиль</h1>
+      <div className="profile-page">
 
-      <div className="user-info-section">
-        <p className="username-info">Имя пользователя: {username}</p>
-        <div className="date-section">
-          <h3>Установка даты (гггг-мм-дд)</h3>
-          <input
-            type="text"
-            value={userDate}
-            onChange={(e) => setUserDate(e.target.value)}
-            placeholder="Введите дату в формате ГГГГ-ММ-ДД"
-            className="date-input"
-          />
-        </div>
-      </div>
-
-      <section className="notification-settings">
-        <h2 className="notifications-h">Настройки уведомлений</h2>
-
-        <div className="days-notice-section">
-          <h3>Дни до уведомления</h3>
-          <input
-            type="number"
-            value={nDaysNotice}
-            onChange={(e) => setNDaysNotice(Number(e.target.value))}
-            min="1"
-            max="30"
-            className="notice-input"
-          />
-        </div>
-
-        <div className="settings-section">
-          <h3>Конкретные олимпиады</h3>
-          <div className="checkbox-group">
-            {availableOlympiads.map(olympiad => (
-              <label key={olympiad.id} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notificationFilters.olympiads.includes(olympiad.id)}
-                  onChange={() => handleFilterChange('olympiads', olympiad.id)}
-                />
-                <span>{olympiad.title}</span>
-              </label>
-            ))}
+        <button
+            className="dashboard-button"
+            onClick={() => navigate('/dashboard')}
+        >
+          Перейти на главную страницу
+        </button>
+          <div className="profile-header">
+            <h1 className="profile-title">Ваш профиль</h1>
           </div>
-        </div>
 
-        <div className="settings-section">
-          <h3>Предметы</h3>
-          <div className="checkbox-group">
-            {uniqueSubjects.map(subject => (
-              <label key={subject} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notificationFilters.subjects.includes(subject)}
-                  onChange={() => handleFilterChange('subjects', subject)}
-                />
-                {subject}
-              </label>
-            ))}
+          <div className="user-info-section">
+            <p className="username-info">Имя пользователя: {username}</p>
+            <div className="date-section">
+              <h3>Установка даты (гггг-мм-дд)</h3>
+              <input
+                  type="text"
+                  value={userDate}
+                  onChange={(e) => setUserDate(e.target.value)}
+                  placeholder="Введите дату в формате ГГГГ-ММ-ДД"
+                  className="date-input"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="settings-section">
-          <h3>Уровни олимпиад</h3>
-          <div className="checkbox-group">
-            {['1', '2', '3'].map(level => (
-              <label key={level} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notificationFilters.levels.includes(level)}
-                  onChange={() => handleFilterChange('levels', level)}
-                />
-                {level === '1' ? 'I уровень' :
-                  level === '2' ? 'II уровень' : 'III уровень'}
-              </label>
-            ))}
-          </div>
-        </div>
-      </section>
+          <section className="notification-settings">
+            <h2 className="notifications-h">Настройки уведомлений</h2>
 
-      <section className="participation-history">
-        <h2>История участия</h2>
-        {participations.length > 0 ? (
-          <div className="history-list">
-            {participations.map(olympiad => (
-              <div key={olympiad.id} className="history-item">
-                <div className="item-info">
-                  <h4>{olympiad.title}</h4>
-                  <p>Дата начала: {olympiad.start_date}</p>
-                  <p>Дата окончания: {olympiad.end_date}</p>
-                  <p>Уровень: {olympiad.level}</p>
-                  <p>Предметы: {olympiad.subjects.join(', ')}</p>
-                </div>
-                <button
-                  onClick={() => handleRemoveParticipation(olympiad.id)}
-                  className="remove-btn"
-                >
-                  Удалить
-                </button>
+            <div className="days-notice-section">
+              <h3>Дни до уведомления</h3>
+              <input
+                  type="number"
+                  value={nDaysNotice}
+                  onChange={(e) => setNDaysNotice(Number(e.target.value))}
+                  min="1"
+                  max="30"
+                  className="notice-input"
+              />
+            </div>
+
+            <div className="settings-section">
+              <h3>Конкретные олимпиады</h3>
+              <div className="checkbox-group">
+                {availableOlympiads.map(olympiad => (
+                    <label key={olympiad.id} className="checkbox-label">
+                      <input
+                          type="checkbox"
+                          checked={notificationFilters.olympiads.includes(olympiad.id)}
+                          onChange={() => handleFilterChange('olympiads', olympiad.id)}
+                      />
+                      <span>{olympiad.title}</span>
+                    </label>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-history">Вы еще не участвовали в олимпиадах</p>
-        )}
-      </section>
+            </div>
 
-      <div className="status-messages">
-        {saveSuccess && (
-          <div className="success-message">
-            ✅ Изменения успешно сохранены
+            <div className="settings-section">
+              <h3>Предметы</h3>
+              <div className="checkbox-group">
+                {uniqueSubjects.map(subject => (
+                    <label key={subject} className="checkbox-label">
+                      <input
+                          type="checkbox"
+                          checked={notificationFilters.subjects.includes(subject)}
+                          onChange={() => handleFilterChange('subjects', subject)}
+                      />
+                      {subject}
+                    </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="settings-section">
+              <h3>Уровни олимпиад</h3>
+              <div className="checkbox-group">
+                {['1', '2', '3'].map(level => (
+                    <label key={level} className="checkbox-label">
+                      <input
+                          type="checkbox"
+                          checked={notificationFilters.levels.includes(level)}
+                          onChange={() => handleFilterChange('levels', level)}
+                      />
+                      {level === '1' ? 'I уровень' :
+                          level === '2' ? 'II уровень' : 'III уровень'}
+                    </label>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="participation-history">
+            <h2>История участия</h2>
+            {participations.length > 0 ? (
+                <div className="history-list">
+                  {participations.map(olympiad => (
+                      <div key={olympiad.id} className="history-item">
+                        <div className="item-info">
+                          <h4>{olympiad.title}</h4>
+                          <p>Дата начала: {olympiad.start_date}</p>
+                          <p>Дата окончания: {olympiad.end_date}</p>
+                          <p>Уровень: {olympiad.level}</p>
+                          <p>Предметы: {olympiad.subjects.join(', ')}</p>
+                        </div>
+                        <button
+                            onClick={() => handleRemoveParticipation(olympiad.id)}
+                            className="remove-btn"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                  ))}
+                </div>
+            ) : (
+                <p className="no-history">Вы еще не участвовали в олимпиадах</p>
+            )}
+          </section>
+
+          <div className="status-messages">
+            {saveSuccess && (
+                <div className="success-message">
+                  ✅ Изменения успешно сохранены
+                </div>
+            )}
+            {saveError && (
+                <div className="error-message">
+                  ⚠️ Что-то пошло не так. Попробуйте еще раз
+                </div>
+            )}
           </div>
-        )}
-        {saveError && (
-          <div className="error-message">
-            ⚠️ Что-то пошло не так. Попробуйте еще раз
-          </div>
-        )}
+
+          <button onClick={handleSave} className="save-button">
+            Сохранить изменения
+          </button>
       </div>
-
-      <button onClick={handleSave} className="save-button">
-        Сохранить изменения
-      </button>
-    </div>
-  );
+);
 };
 
 export default ProfilePage;

@@ -193,7 +193,7 @@ const handleParticipation = async (olympiadId: number, e: React.MouseEvent) => {
               onClick={() => navigate('/dashboard')}
           >
             <ArrowLeft size={20}/>
-            Назад в личный кабинет
+            Перейти на главную страницу
           </button>
         </div>
         <div className="olympiads-content">

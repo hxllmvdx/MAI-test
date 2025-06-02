@@ -28,7 +28,7 @@ body {
 
 .dashboard-container {
   padding-top: 0px;
-  max-width: 1280px;
+  max-width: 1000%;
   margin-top: 0px;
   padding: 0 1.5rem 2rem;
   background: linear-gradient(135deg, #6a5af9 0%, #9f7aea 100%);
@@ -42,7 +42,9 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  text-align: center;
   justify-content: space-between;
+  margin-top: 20px;
   margin-bottom: 2.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid rgba(255 255 255 / 0.3);
@@ -54,7 +56,9 @@ body {
   color: #fff;
   letter-spacing: 0.05em;
   text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  margin: 0 0 0.3rem 0;
+  margin: 0 20px 0.3rem 0;
+  padding-top: 20px;
+
 }
 
 .buttons-container {
@@ -66,7 +70,7 @@ body {
 .primary-button,
 .logout-button {
   margin-top: 20px;
-  
+
   padding-bottom: 30px;
   padding-top: 20px;
   padding-bottom: 20px;

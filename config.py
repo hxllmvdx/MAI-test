@@ -10,6 +10,8 @@ class Config(BaseSettings):
     subjects_urls: str
     # database
     db_url: str
+    #auth
+    secret_key: str
 
 
 absolute_path_dotenv = '/Users/matvejsamodanov/PycharmProjects/MAI-test/.env'
